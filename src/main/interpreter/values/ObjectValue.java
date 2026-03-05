@@ -1,0 +1,146 @@
+package main.interpreter.values;
+
+import main.expr.Expression;
+import main.interpreter.Executor;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public final class ObjectValue extends Value {
+    private final HashMap<String, Value> fields; // and methods
+    public final Executor executor;
+    public ObjectValue(InterpretedClassValue cv, Executor executor) {
+        this.executor = executor;
+        this.fields = new HashMap<>();
+        for (Map.Entry<String, Expression> expr : cv.fields.entrySet()) {
+            fields.put(expr.getKey(), executor.evaluate(expr.getValue()));
+        }
+    }
+    public Value add(Value v) {
+        if (!fields.containsKey("_add"))
+            throw new InvalidOperationException("Cannot add an object");
+        return fields.get("_add").call(List.of(v));
+    }
+    public Value sub(Value v) {
+        if (!fields.containsKey("_sub"))
+            throw new InvalidOperationException("Cannot subtract an object");
+        return fields.get("_sub").call(List.of(v));
+    }
+    public Value mul(Value v) {
+        if (!fields.containsKey("_mul"))
+            throw new InvalidOperationException("Cannot multiply an object");
+        return fields.get("_mul").call(List.of(v));
+    }
+    public Value div(Value v) {
+        if (!fields.containsKey("_div"))
+            throw new InvalidOperationException("Cannot divide an object");
+        return fields.get("_div").call(List.of(v));
+    }
+    public Value mod(Value v) {
+        if (!fields.containsKey("_mod"))
+            throw new InvalidOperationException("Cannot modulo an object");
+        return fields.get("_mod").call(List.of(v));
+    }
+    public Value getMember(String s) {
+        if (fields.get(s) == null)
+            throw new InvalidOperationException("Cannot get member value "+s+" from an object");
+        return fields.get(s);
+    }
+    public Value index(Value v) {
+        if (!fields.containsKey("_index"))
+            throw new InvalidOperationException("Cannot index an object");
+        return fields.get("_index").call(List.of(v));
+    }
+    public Value call(List<Value> v) {
+        if (!fields.containsKey("_call"))
+            throw new InvalidOperationException("Cannot call an object");
+        return fields.get("_call").call(v);
+    }
+    public BooleanValue eq(Value v) {
+        if (!fields.containsKey("_eq")) {
+            return new BooleanValue(equals(v), executor);
+        }
+        Value val = fields.get("_eq").call(List.of(v));
+        if (!(val instanceof BooleanValue bv)) {
+            throw new InvalidOperationException("Cannot compare an object to a non-boolean value");
+        }
+        return bv;
+    }
+    public BooleanValue neq(Value v) {
+        if (!fields.containsKey("_neq")) {
+            return new BooleanValue(!equals(v), executor);
+        }
+        Value val = fields.get("_neq").call(List.of(v));
+        if (!(val instanceof BooleanValue bv))
+            throw new InvalidOperationException("Cannot compare an object to a non-boolean value");
+        return bv;
+    }
+    public BooleanValue gt(Value v) {
+        if (!fields.containsKey("_gt")) {
+            throw new InvalidOperationException("Cannot compare an object to a number");
+        }
+        Value val = fields.get("_gt").call(List.of(v));
+        if (!(val instanceof BooleanValue bv))
+            throw new InvalidOperationException("Cannot compare an object to a non-boolean value");
+        return bv;
+    }
+    public BooleanValue gte(Value v) {
+        if (!fields.containsKey("_gte")) {
+            throw new InvalidOperationException("Cannot compare an object to a number");
+        }
+        Value val = fields.get("_gte").call(List.of(v));
+        if (!(val instanceof BooleanValue bv))
+            throw new InvalidOperationException("Cannot compare an object to a non-boolean value");
+        return bv;
+    }
+    public BooleanValue lt(Value v) {
+        if (!fields.containsKey("_lt")) {
+            throw new InvalidOperationException("Cannot compare an object to a number");
+        }
+        Value val = fields.get("_lt").call(List.of(v));
+        if (!(val instanceof BooleanValue bv))
+            throw new InvalidOperationException("Cannot compare an object to a non-boolean value");
+        return bv;
+    }
+    public BooleanValue lte(Value v) {
+        if (!fields.containsKey("_lte")) {
+            throw new InvalidOperationException("Cannot compare an object to a number");
+        }
+        Value val = fields.get("_lte").call(List.of(v));
+        if (!(val instanceof BooleanValue bv))
+            throw new InvalidOperationException("Cannot compare an object to a non-boolean value");
+        return bv;
+    }
+    public Value neg() {
+        if (!fields.containsKey("_neg"))
+            throw new InvalidOperationException("Cannot negate an object");
+        return fields.get("_neg").call(List.of());
+    }
+    public Value inv() {
+        if (!fields.containsKey("_inv"))
+            throw new InvalidOperationException("Cannot invert an object");
+        return fields.get("_inv").call(List.of());
+    }
+    public BooleanValue isTruthy() {
+        if (!fields.containsKey("_bool"))
+            return new BooleanValue(true, executor); // it is not null
+        Value val = fields.get("_bool").call(List.of());
+        if (!(val instanceof BooleanValue bv))
+            throw new InvalidOperationException("Cannot check if an object is truthy");
+        return bv;
+    }
+    public Value toNumber() {
+        if (!fields.containsKey("_num"))
+            throw new InvalidOperationException("Cannot convert an object to a number");
+        return fields.get("_num").call(List.of());
+    }
+    public String toString() {
+        if (!fields.containsKey("_str"))
+            return "<object>";
+        Value val = fields.get("_str").call(List.of());
+        if (!(val instanceof StringValue sv))
+            throw new InvalidOperationException("Cannot convert an object to a string");
+        return sv.value;
+    }
+}

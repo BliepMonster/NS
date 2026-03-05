@@ -49,10 +49,11 @@ public class Parser {
     Expression assignment() {
         Expression expr = or();
         if (match(EQ)) {
+            Token t = previous();
             if (!isAssignable(expr))
                 throw new ParserException(peek().line(), "Invalid assignment target.");
             Expression right = assignment();
-            return new AssignmentExpression(expr, right);
+            return new AssignmentExpression(expr, right, t);
         }
         return expr;
     }
@@ -74,15 +75,15 @@ public class Parser {
     }
     Expression or() {
         Expression expr = and();
-        if (match(OR)) {
-            return new BinaryExpression(expr, previous(), or());
+        while (match(OR)) {
+            expr = new BinaryExpression(expr, previous(), and());
         }
         return expr;
     }
     Expression and() {
         Expression expr = equality();
-        if (match(AND)) {
-            return new BinaryExpression(expr, previous(), and());
+        while (match(AND)) {
+            expr = new BinaryExpression(expr, previous(), equality());
         }
         return expr;
     }
@@ -115,7 +116,7 @@ public class Parser {
         return expr;
     }
     Expression unary() {
-        if (match(BANG, QUESTION, HASH)) {
+        if (match(BANG, QUESTION, HASH, MINUS)) {
             return new UnaryExpression(previous(), unary());
         }
         return call();
@@ -145,6 +146,10 @@ public class Parser {
                         "Expect property name after '.'.");
                 Token name = previous();
                 expr = new MemberExpression(expr, name.text());
+            } else if (match(LBRACKET)) {
+                Expression index = expression();
+                consume(RBRACKET, "Expect ']' after index.");
+                expr = new IndexExpression(expr, index);
             } else {
                 break;
             }
@@ -153,22 +158,22 @@ public class Parser {
     }
     Expression primary() {
         Token t = advance();
-        switch(t.type()) {
-            case THIS: return new ThisExpression();
-            case TRUE: return new LiteralExpression(true);
-            case FALSE: return new LiteralExpression(false);
-            case NULL: return new LiteralExpression(null);
-            case NUMBER: return new LiteralExpression(Double.parseDouble(t.text()));
-            case STRING: return new LiteralExpression(t.text());
-            case IDENTIFIER: return new VariableLookupExpression(t.text());
-            case LPAREN: return paren();
-            case CLASS: return classDeclaration();
-            case LBRACE: return block();
-            case RETURN: return returnExpression();
-            case LBRACKET: return list();
-            case DOLLAR: return nativeCall();
-            default: throw new ParserException(t.line(), "Expect expression.");
-        }
+        return switch (t.type()) {
+            case THIS -> new ThisExpression();
+            case TRUE -> new LiteralExpression(true);
+            case FALSE -> new LiteralExpression(false);
+            case NULL -> new LiteralExpression(null);
+            case NUMBER -> new LiteralExpression(Double.parseDouble(t.text()));
+            case STRING -> new LiteralExpression(t.text());
+            case IDENTIFIER -> new VariableLookupExpression(t.text());
+            case LPAREN -> paren();
+            case CLASS -> classDeclaration();
+            case LBRACE -> block();
+            case RETURN -> returnExpression();
+            case LBRACKET -> list();
+            case DOLLAR -> nativeCall();
+            default -> throw new ParserException(t.line(), "Expect expression.");
+        };
     }
     Token previous() {
         return tokens.get(index - 1);

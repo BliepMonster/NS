@@ -1,0 +1,170 @@
+package main.interpreter.values;
+
+import main.interpreter.Executor;
+
+import java.util.List;
+
+public abstract non-sealed class CompiledFunctionValue extends Value {
+    public final Executor executor;
+    public CompiledFunctionValue(Executor executor) {
+        this.executor = executor;
+    }
+    public Value add(Value v) {
+        if (!(v instanceof CompiledFunctionValue)) {
+            if (v instanceof InterpretedFunctionValue iv) {
+                return new CompiledFunctionValue(executor) {
+                    public Value call(List<Value> args) {
+                        return CompiledFunctionValue.this.call(args).add(iv.call(args));
+                    }
+                };
+            }
+            return new CompiledFunctionValue(executor) {
+                public Value call(List<Value> args) {
+                    return CompiledFunctionValue.this.call(args).add(v);
+                }
+            };
+        } else {
+            return new CompiledFunctionValue(executor) {
+                public Value call(List<Value> args) {
+                    return CompiledFunctionValue.this.call(args).add(v.call(args));
+                }
+            };
+        }
+    }
+    public String toString() {
+        return "<generated function>";
+    }
+    public Value sub(Value v) {
+        if (!(v instanceof CompiledFunctionValue)) {
+            if (v instanceof InterpretedFunctionValue iv) {
+                return new CompiledFunctionValue(executor) {
+                    public Value call(List<Value> args) {
+                        return CompiledFunctionValue.this.call(args).sub(iv.call(args));
+                    }
+                };
+            }
+            return new CompiledFunctionValue(executor) {
+                public Value call(List<Value> args) {
+                    return CompiledFunctionValue.this.call(args).sub(v);
+                }
+            };
+        } else {
+            return new CompiledFunctionValue(executor) {
+                public Value call(List<Value> args) {
+                    return CompiledFunctionValue.this.call(args).sub(v.call(args));
+                }
+            };
+        }
+    }
+    public Value mul(Value v) {
+        if (!(v instanceof CompiledFunctionValue)) {
+            if (v instanceof InterpretedFunctionValue iv) {
+                return new CompiledFunctionValue(executor) {
+                    public Value call(List<Value> args) {
+                        return CompiledFunctionValue.this.call(args).mul(iv.call(args));
+                    }
+                };
+            }
+            return new CompiledFunctionValue(executor) {
+                public Value call(List<Value> args) {
+                    return CompiledFunctionValue.this.call(args).mul(v);
+                }
+            };
+        } else {
+            return new CompiledFunctionValue(executor) {
+                public Value call(List<Value> args) {
+                    return CompiledFunctionValue.this.call(args).mul(v.call(args));
+                }
+            };
+        }
+    }
+    public Value div(Value v) {
+        if (!(v instanceof CompiledFunctionValue)) {
+            if (v instanceof InterpretedFunctionValue iv) {
+                return new CompiledFunctionValue(executor) {
+                    public Value call(List<Value> args) {
+                        return CompiledFunctionValue.this.call(args).div(iv.call(args));
+                    }
+                };
+            }
+            return new CompiledFunctionValue(executor) {
+                public Value call(List<Value> args) {
+                    return CompiledFunctionValue.this.call(args).div(v);
+                }
+            };
+        } else {
+            return new CompiledFunctionValue(executor) {
+                public Value call(List<Value> args) {
+                    return CompiledFunctionValue.this.call(args).div(v.call(args));
+                }
+            };
+        }
+    }
+    public Value mod(Value v) {
+        if (!(v instanceof CompiledFunctionValue)) {
+            if (v instanceof InterpretedFunctionValue iv) {
+                return new CompiledFunctionValue(executor) {
+                    public Value call(List<Value> args) {
+                        return CompiledFunctionValue.this.call(args).mod(iv.call(args));
+                    }
+                };
+            }
+            return new CompiledFunctionValue(executor) {
+                public Value call(List<Value> args) {
+                    return CompiledFunctionValue.this.call(args).mod(v);
+                }
+            };
+        } else {
+            return new CompiledFunctionValue(executor) {
+                public Value call(List<Value> args) {
+                    return CompiledFunctionValue.this.call(args).mod(v.call(args));
+                }
+            };
+        }
+    }
+    public Value getMember(String s) {
+        throw new UnsupportedOperationException("Cannot get member value "+s+" from a function");
+    }
+    public Value index(Value v) {
+        throw new UnsupportedOperationException("Cannot index a function");
+    }
+    public abstract Value call(List<Value> args);
+    public BooleanValue eq(Value v) {
+        return new BooleanValue(equals(v), executor);
+    }
+    public BooleanValue neq(Value v) {
+        return new BooleanValue(!equals(v), executor);
+    }
+    public BooleanValue gt(Value v) {
+        throw new UnsupportedOperationException("Cannot compare a function to a number");
+    }
+    public BooleanValue gte(Value v) {
+        throw new UnsupportedOperationException("Cannot compare a function to a number");
+    }
+    public BooleanValue lt(Value v) {
+        throw new UnsupportedOperationException("Cannot compare a function to a number");
+    }
+    public BooleanValue lte(Value v) {
+        throw new UnsupportedOperationException("Cannot compare a function to a number");
+    }
+    public Value neg() {
+        return new CompiledFunctionValue(executor) {
+            public Value call(List<Value> args) {
+                return CompiledFunctionValue.this.call(args).neg();
+            }
+        };
+    }
+    public Value inv() {
+        return new CompiledFunctionValue(executor) {
+            public Value call(List<Value> args) {
+                return CompiledFunctionValue.this.call(args).inv();
+            }
+        };
+    }
+    public BooleanValue isTruthy() {
+        return new BooleanValue(true, executor);
+    }
+    public Value toNumber() {
+        throw new UnsupportedOperationException("Cannot convert a function to a number");
+    }
+}
