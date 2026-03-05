@@ -89,3 +89,10 @@ $ print(((tmp1, tmp2, tmp3, c) -> ((until) -> (c <= until)::tmp3 + 0*(c = c + 1 
 ```
 
 This prints the first 200 numbers in the fibonacci sequence.
+## Future plans
+* +=, ... operators
+* Range values (0..10)
+* Pattern matching
+* Enums
+* Dictionaries and sets
+* Expand stdlib
