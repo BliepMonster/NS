@@ -143,7 +143,7 @@ public sealed class InterpretedFunctionValue extends Value permits MethodValue {
         return executor.callFunction(this, args, null);
     }
     public BooleanValue eq(Value v) {
-        return new BooleanValue(equals(v), executor);
+        return BooleanValue.fromBoolean(equals(v));
     }
     public Value neg() {
         return new CompiledFunctionValue(executor) {
@@ -160,10 +160,10 @@ public sealed class InterpretedFunctionValue extends Value permits MethodValue {
         };
     }
     public BooleanValue isTruthy() {
-        return new BooleanValue(true, executor);
+        return BooleanValue.fromBoolean(true);
     }
     public BooleanValue neq(Value v) {
-        return new BooleanValue(!equals(v), executor);
+        return BooleanValue.fromBoolean(!equals(v));
     }
     public BooleanValue lt(Value v) {
         throw new UnsupportedOperationException("Cannot compare a function to a number");

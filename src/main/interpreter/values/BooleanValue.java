@@ -5,9 +5,18 @@ import main.interpreter.Executor;
 public final class BooleanValue extends Value {
     public final boolean value;
     public final Executor executor;
-    public BooleanValue(boolean value, Executor executor) {
+    private BooleanValue(boolean value, Executor executor) {
         this.value = value;
         this.executor = executor;
+    }
+    public static BooleanValue TRUE;
+    public static BooleanValue FALSE;
+    public static void init(Executor executor) {
+        TRUE = new BooleanValue(true, executor);
+        FALSE = new BooleanValue(false, executor);
+    }
+    public static BooleanValue fromBoolean(boolean value) {
+        return value ? TRUE : FALSE;
     }
     public Value add(Value v) {
         if (v instanceof StringValue sv) {

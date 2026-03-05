@@ -40,7 +40,7 @@ public final class InterpretedClassValue extends Value {
         return new ObjectValue(this, executor);
     }
     public BooleanValue eq(Value v) {
-        return new BooleanValue(equals(v), executor);
+        return BooleanValue.fromBoolean(equals(v));
     }
     public Value neg() {
         throw new InvalidOperationException("Cannot negate a class");
@@ -49,10 +49,10 @@ public final class InterpretedClassValue extends Value {
         throw new InvalidOperationException("Cannot invert a class");
     }
     public BooleanValue isTruthy() {
-        return new BooleanValue(true, executor);
+        return BooleanValue.fromBoolean(true);
     }
     public BooleanValue neq(Value v) {
-        return new BooleanValue(!equals(v), executor);
+        return BooleanValue.fromBoolean(!equals(v));
     }
     public BooleanValue gt(Value v) {
         throw new InvalidOperationException("Cannot compare a class to a number");

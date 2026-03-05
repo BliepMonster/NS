@@ -41,10 +41,10 @@ public final class NullValue extends Value {
         throw new InvalidOperationException("Cannot call a null");
     }
     public BooleanValue eq(Value v) {
-        return new BooleanValue(v instanceof NullValue, executor);
+        return BooleanValue.fromBoolean(v instanceof NullValue);
     }
     public BooleanValue neq(Value v) {
-        return new BooleanValue(!(v instanceof NullValue), executor);
+        return BooleanValue.fromBoolean(!(v instanceof NullValue));
     }
     public Value neg() {
         throw new InvalidOperationException("Cannot negate a null");
@@ -53,7 +53,7 @@ public final class NullValue extends Value {
         throw new InvalidOperationException("Cannot invert a null");
     }
     public BooleanValue isTruthy() {
-        return new BooleanValue(false, executor);
+        return BooleanValue.fromBoolean(false);
     }
     public BooleanValue lt(Value v) {
         throw new InvalidOperationException("Cannot compare a null to a number");

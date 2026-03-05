@@ -51,7 +51,7 @@ public final class NumericValue extends Value {
         throw new InvalidOperationException("Cannot call a number");
     }
     public BooleanValue eq(Value v) {
-        return new BooleanValue(v instanceof NumericValue nv && number == nv.number, executor);
+        return BooleanValue.fromBoolean(v instanceof NumericValue nv && number == nv.number);
     }
     public Value neg() {
         return new NumericValue(-number, executor);
@@ -60,32 +60,32 @@ public final class NumericValue extends Value {
         throw new InvalidOperationException("Cannot invert a number");
     }
     public BooleanValue isTruthy() {
-        return new BooleanValue(number != 0, executor);
+        return BooleanValue.fromBoolean(number != 0);
     }
     public BooleanValue neq(Value v) {
         if (!(v instanceof NumericValue nv))
-            return new BooleanValue(true, executor);
-        return new BooleanValue(number != nv.number, executor);
+            return BooleanValue.fromBoolean(true);
+        return BooleanValue.fromBoolean(number != nv.number);
     }
     public BooleanValue lt(Value v) {
         if (!(v instanceof NumericValue nv))
             throw new InvalidOperationException("Cannot compare a number to a " + v.getClass().getSimpleName());
-        return new BooleanValue(number < nv.number, executor);
+        return BooleanValue.fromBoolean(number < nv.number);
     }
     public BooleanValue lte(Value v) {
         if (!(v instanceof NumericValue nv))
             throw new InvalidOperationException("Cannot compare a number to a " + v.getClass().getSimpleName());
-        return new BooleanValue(number <= nv.number, executor);
+        return BooleanValue.fromBoolean(number <= nv.number);
     }
     public BooleanValue gt(Value v) {
         if (!(v instanceof NumericValue nv))
             throw new InvalidOperationException("Cannot compare a number to a " + v.getClass().getSimpleName());
-        return new BooleanValue(number > nv.number, executor);
+        return BooleanValue.fromBoolean(number > nv.number);
     }
     public BooleanValue gte(Value v) {
         if (!(v instanceof NumericValue nv))
             throw new InvalidOperationException("Cannot compare a number to a " + v.getClass().getSimpleName());
-        return new BooleanValue(number >= nv.number, executor);
+        return BooleanValue.fromBoolean(number >= nv.number);
     }
     public Value toNumber() {
         return this;

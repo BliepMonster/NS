@@ -103,16 +103,16 @@ public final class VectorValue extends Value {
     }
     public BooleanValue eq(Value v) {
         if (!(v instanceof VectorValue vv))
-            return new BooleanValue(false, executor);
+            return BooleanValue.fromBoolean(false);
         if (elements.length != vv.elements.length)
-            return new BooleanValue(false, executor);
+            return BooleanValue.fromBoolean(false);
         for (int i = 0; i < elements.length; i++) {
             NumericValue n1 = elements[i];
             NumericValue n2 = vv.elements[i];
             if (n1.neq(n2).value)
-                return new BooleanValue(false, executor);
+                return BooleanValue.fromBoolean(false);
         }
-        return new BooleanValue(true, executor);
+        return BooleanValue.fromBoolean(true);
     }
     public Value neg() {
         NumericValue[] newElements = new NumericValue[elements.length];
@@ -125,20 +125,20 @@ public final class VectorValue extends Value {
         throw new InvalidOperationException("Cannot invert a vector");
     }
     public BooleanValue isTruthy() {
-        return new BooleanValue(elements.length != 0, executor);
+        return BooleanValue.fromBoolean(elements.length != 0);
     }
     public BooleanValue neq(Value v) {
         if (!(v instanceof VectorValue vv))
-            return new BooleanValue(true, executor);
+            return BooleanValue.fromBoolean(true);
         if (elements.length != vv.elements.length)
-            return new BooleanValue(true, executor);
+            return BooleanValue.fromBoolean(true);
         for (int i = 0; i < elements.length; i++) {
             NumericValue n1 = elements[i];
             NumericValue n2 = vv.elements[i];
             if (n1.neq(n2).value)
-                return new BooleanValue(true, executor);
+                return BooleanValue.fromBoolean(true);
         }
-        return new BooleanValue(false, executor);
+        return BooleanValue.fromBoolean(false);
     }
     public BooleanValue lt(Value v) {
         throw new InvalidOperationException("Cannot compare a vector to a number");

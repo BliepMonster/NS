@@ -18,4 +18,5 @@ public interface ExpressionVisitor<R> {
     R visitNativeFunctionCallExpression(NativeFunctionCallExpression expr);
     R visitListExpression(ListExpression expr);
     R visitIndexExpression(IndexExpression expr);
+    R visitTernaryExpression(TernaryExpression expr);
 }

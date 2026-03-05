@@ -85,15 +85,15 @@ public final class ListValue extends Value {
     public BooleanValue eq(Value v) {
         if (v instanceof ListValue lv) {
             if (lv.elements.size() != elements.size())
-                return new BooleanValue(false, executor);
+                return BooleanValue.fromBoolean(false);
             for (int i = 0; i < lv.elements.size(); i++) {
                 BooleanValue val = elements.get(i).eq(lv.elements.get(i));
                 if (!val.value)
-                    return new BooleanValue(false, executor);
+                    return BooleanValue.fromBoolean(false);
             }
-            return new BooleanValue(true, executor);
+            return BooleanValue.fromBoolean(true);
         }
-        return new BooleanValue(false, executor);
+        return BooleanValue.fromBoolean(false);
     }
     public Value neg() {
         throw new InvalidOperationException("Can't use '-' on lists");
@@ -105,20 +105,20 @@ public final class ListValue extends Value {
         return new NumericValue(elements.size(), executor);
     }
     public BooleanValue isTruthy() {
-        return new BooleanValue(!elements.isEmpty(), executor);
+        return BooleanValue.fromBoolean(!elements.isEmpty());
     }
     public BooleanValue neq(Value v) {
         if (v instanceof ListValue lv) {
             if (lv.elements.size() != elements.size())
-                return new BooleanValue(true, executor);
+                return BooleanValue.fromBoolean(true);
             for (int i = 0; i < lv.elements.size(); i++) {
                 BooleanValue val = elements.get(i).neq(lv.elements.get(i));
                 if (val.value)
-                    return new BooleanValue(true, executor);
+                    return BooleanValue.fromBoolean(true);
             }
-            return new BooleanValue(false, executor);
+            return BooleanValue.fromBoolean(false);
         }
-        return new BooleanValue(true, executor);
+        return BooleanValue.fromBoolean(true);
     }
     public BooleanValue lt(Value v) {
         throw new InvalidOperationException("Can't use '<' on lists");

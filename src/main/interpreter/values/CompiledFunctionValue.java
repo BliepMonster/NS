@@ -130,10 +130,10 @@ public abstract non-sealed class CompiledFunctionValue extends Value {
     }
     public abstract Value call(List<Value> args);
     public BooleanValue eq(Value v) {
-        return new BooleanValue(equals(v), executor);
+        return BooleanValue.fromBoolean(equals(v));
     }
     public BooleanValue neq(Value v) {
-        return new BooleanValue(!equals(v), executor);
+        return BooleanValue.fromBoolean(!equals(v));
     }
     public BooleanValue gt(Value v) {
         throw new UnsupportedOperationException("Cannot compare a function to a number");
@@ -162,7 +162,7 @@ public abstract non-sealed class CompiledFunctionValue extends Value {
         };
     }
     public BooleanValue isTruthy() {
-        return new BooleanValue(true, executor);
+        return BooleanValue.fromBoolean(true);
     }
     public Value toNumber() {
         throw new UnsupportedOperationException("Cannot convert a function to a number");

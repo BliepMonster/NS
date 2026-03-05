@@ -20,12 +20,21 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
     private final List<Statement> statements;
     public Interpreter(List<Statement> statements) {
         NullValue.init(this);
+        BooleanValue.init(this);
         this.statements = statements;
     }
     public void interpret() {
         for (Statement stmt : statements) {
             stmt.accept(this);
         }
+    }
+    public Value visitTernaryExpression(TernaryExpression expr) {
+        Value v = expr.condition.accept(this);
+        if (!(v instanceof BooleanValue bv))
+            throw new RuntimeException("Expected boolean value, got " + v);
+        if (bv.value)
+            return expr.trueExpr.accept(this);
+        return expr.falseExpr.accept(this);
     }
     public Void visitExpressionStatement(ExpressionStatement stmt) {
         stmt.expr.accept(this);
@@ -113,7 +122,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
     public Value visitLiteralExpression(LiteralExpression expr) {
         return switch (expr.value) {
             case String s -> new StringValue(s, this);
-            case Boolean b -> new BooleanValue(b, this);
+            case Boolean b -> BooleanValue.fromBoolean(b);
             case Double d -> new NumericValue(d, this);
             case null -> NullValue.INSTANCE;
             default -> throw new RuntimeException("Invalid literal: " + expr.value);

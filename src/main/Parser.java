@@ -47,7 +47,7 @@ public class Parser {
         return assignment();
     }
     Expression assignment() {
-        Expression expr = or();
+        Expression expr = ternary();
         if (match(EQ)) {
             Token t = previous();
             if (!isAssignable(expr))
@@ -58,7 +58,7 @@ public class Parser {
         return expr;
     }
     boolean isAssignable(Expression expr) {
-        return expr instanceof VariableLookupExpression || expr instanceof MemberExpression;
+        return expr instanceof VariableLookupExpression || expr instanceof MemberExpression || expr instanceof IndexExpression;
     }
     boolean match(TokenType... types) {
         Token t = peek();
@@ -72,6 +72,16 @@ public class Parser {
     }
     Token peek() {
         return tokens.get(index);
+    }
+    Expression ternary() {
+        Expression expr = or();
+        if (match(QUESTION)) {
+            Expression trueExpr = expression();
+            consume(COLON, "Expect ':' after '?'");
+            Expression falseExpr = expression();
+            return new TernaryExpression(expr, trueExpr, falseExpr);
+        }
+        return expr;
     }
     Expression or() {
         Expression expr = and();

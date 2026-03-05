@@ -63,7 +63,7 @@ public final class ObjectValue extends Value {
     }
     public BooleanValue eq(Value v) {
         if (!fields.containsKey("_eq")) {
-            return new BooleanValue(equals(v), executor);
+            return BooleanValue.fromBoolean(equals(v));
         }
         Value val = fields.get("_eq").call(List.of(v));
         if (!(val instanceof BooleanValue bv)) {
@@ -73,7 +73,7 @@ public final class ObjectValue extends Value {
     }
     public BooleanValue neq(Value v) {
         if (!fields.containsKey("_neq")) {
-            return new BooleanValue(!equals(v), executor);
+            return BooleanValue.fromBoolean(!equals(v));
         }
         Value val = fields.get("_neq").call(List.of(v));
         if (!(val instanceof BooleanValue bv))
@@ -128,7 +128,7 @@ public final class ObjectValue extends Value {
     }
     public BooleanValue isTruthy() {
         if (!fields.containsKey("_bool"))
-            return new BooleanValue(true, executor); // it is not null
+            return BooleanValue.fromBoolean(true); // it is not null
         Value val = fields.get("_bool").call(List.of());
         if (!(val instanceof BooleanValue bv))
             throw new InvalidOperationException("Cannot check if an object is truthy");

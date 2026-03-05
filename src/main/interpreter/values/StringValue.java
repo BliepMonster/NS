@@ -58,7 +58,7 @@ public final class StringValue extends Value {
         throw new InvalidOperationException("Cannot call a string");
     }
     public BooleanValue eq(Value v) {
-        return new BooleanValue(v instanceof StringValue sv && value.equals(sv.value), executor);
+        return BooleanValue.fromBoolean(v instanceof StringValue sv && value.equals(sv.value));
     }
     public Value neg() {
         throw new InvalidOperationException("Cannot negate a string");
@@ -67,12 +67,12 @@ public final class StringValue extends Value {
         throw new InvalidOperationException("Cannot invert a string");
     }
     public BooleanValue isTruthy() {
-        return new BooleanValue(!value.isEmpty(), executor);
+        return BooleanValue.fromBoolean(!value.isEmpty());
     }
     public BooleanValue neq(Value v) {
         if (!(v instanceof StringValue sv))
-            return new BooleanValue(true, executor);
-        return new BooleanValue(!value.equals(sv.value), executor);
+            return BooleanValue.fromBoolean(true);
+        return BooleanValue.fromBoolean(!value.equals(sv.value));
     }
     public BooleanValue lt(Value v) {
         throw new InvalidOperationException("Cannot compare a string to a number");

@@ -1,0 +1,13 @@
+Object = class() {
+    .y = 2,
+    ._add = (obj) -> build_object(this.y+obj.y)
+};
+build_object = (y) -> {
+    o = Object();
+    o.y = y;
+    return o;
+};
+o = Object();
+p = Object();
+q = o + p;
+$ print(q.y);
