@@ -99,4 +99,7 @@ public final class NumericValue extends Value {
     public Value setIndex(Value v, Value w) {
         throw new InvalidOperationException("Cannot set index in a number");
     }
+    public Value merge(Value v) {
+        throw new InvalidOperationException("Cannot merge a number with a value");
+    }
 }

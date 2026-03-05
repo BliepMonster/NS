@@ -76,4 +76,7 @@ public final class NullValue extends Value {
     public Value setIndex(Value v, Value w) {
         throw new InvalidOperationException("Cannot set index in a null");
     }
+    public Value merge(Value v) {
+        throw new InvalidOperationException("Cannot merge a null with a value");
+    }
 }

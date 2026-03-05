@@ -47,7 +47,7 @@ public class Parser {
         return assignment();
     }
     Expression assignment() {
-        Expression expr = ternary();
+        Expression expr = fallback();
         if (match(EQ)) {
             Token t = previous();
             if (!isAssignable(expr))
@@ -72,6 +72,14 @@ public class Parser {
     }
     Token peek() {
         return tokens.get(index);
+    }
+    Expression fallback() {
+        Expression expr = ternary();
+        if (match(CATCH)) {
+            Expression fallback = expression();
+            return new CatchExpression(expr, fallback);
+        }
+        return expr;
     }
     Expression ternary() {
         Expression expr = or();
@@ -113,7 +121,7 @@ public class Parser {
     }
     Expression term() {
         Expression expr = factor();
-        while (match(PLUS, MINUS)) {
+        while (match(PLUS, MINUS, PIPE)) {
             expr = new BinaryExpression(expr, previous(), factor());
         }
         return expr;

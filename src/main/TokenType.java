@@ -3,13 +3,12 @@ package main;
 public enum TokenType {
     CLASS, // class declarations
     RETURN, // optional expression, otherwise NULL
-    NEW, // instantiation
     THIS,
+    CATCH,
 
     IDENTIFIER,
 
     STRING,
-    BACKTICK, // for expression expressions (`a == b`)
     NUMBER,
     NULL,
     TRUE,
@@ -61,6 +60,8 @@ public enum TokenType {
 
     OR,
     AND,
+
+    PIPE,
 
     EOF
 }

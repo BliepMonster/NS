@@ -108,4 +108,7 @@ public final class StringValue extends Value {
         this.value = this.value.substring(0, (int) nv.number) + sv.value + this.value.substring((int) nv.number+1);
         return this;
     }
+    public Value merge(Value v) {
+        throw new InvalidOperationException("Cannot merge a string with a value");
+    }
 }

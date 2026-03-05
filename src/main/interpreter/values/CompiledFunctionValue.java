@@ -173,4 +173,26 @@ public abstract non-sealed class CompiledFunctionValue extends Value {
     public Value setIndex(Value v, Value w) {
         throw new UnsupportedOperationException("Cannot set index in a function");
     }
+    public Value merge(Value v) {
+        if (!(v instanceof CompiledFunctionValue)) {
+            if (v instanceof InterpretedFunctionValue iv) {
+                return new CompiledFunctionValue(executor) {
+                    public Value call(List<Value> args) {
+                        return CompiledFunctionValue.this.call((List.of(iv.call(args))));
+                    }
+                };
+            }
+            return new CompiledFunctionValue(executor) {
+                public Value call(List<Value> args) {
+                    return CompiledFunctionValue.this.call(List.of(v));
+                }
+            };
+        } else {
+            return new CompiledFunctionValue(executor) {
+                public Value call(List<Value> args) {
+                    return CompiledFunctionValue.this.call(List.of(v.call(args)));
+                }
+            };
+        }
+    }
 }

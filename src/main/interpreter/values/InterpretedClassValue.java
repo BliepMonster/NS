@@ -78,4 +78,8 @@ public final class InterpretedClassValue extends Value {
     public Value setIndex(Value v, Value w) {
         throw new InvalidOperationException("Cannot set index in a class");
     }
+    // TODO: allow merging of 2 classes as prototype constructs
+    public Value merge(Value v) {
+        throw new InvalidOperationException("Cannot merge a class with a value");
+    }
 }

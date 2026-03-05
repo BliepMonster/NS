@@ -45,4 +45,5 @@ public sealed abstract class Value permits
     public abstract String toString();
     public abstract Value setMember(String name, Value value);
     public abstract Value setIndex(Value index, Value value);
+    public abstract Value merge(Value v);
 }

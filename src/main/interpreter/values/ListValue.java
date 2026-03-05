@@ -155,4 +155,12 @@ public final class ListValue extends Value {
         this.elements.set((int) nv.number, w);
         return w;
     }
+    public Value merge(Value v) {
+        if (v instanceof ListValue lv) {
+            ArrayList<Value> newElements = new ArrayList<>(elements);
+            newElements.addAll(lv.elements);
+            return new ListValue(newElements, executor);
+        }
+        throw new InvalidOperationException("Can't merge a list with a non-list");
+    }
 }

@@ -1,13 +1,17 @@
 Object = class() {
     .y = 2,
-    ._add = (obj) -> build_object(this.y+obj.y)
+    ._add = (obj) -> build_object(this.y+obj.y),
+    ._eq = (obj) -> this.y == obj.y
 };
 build_object = (y) -> {
-    o = Object();
-    o.y = y;
-    return o;
+    obj = Object();
+    obj.y = y;
+    return obj;
 };
 o = Object();
 p = Object();
 q = o + p;
-$ print(q.y);
+e = p + o;
+$ println(q.y);
+$ println (e.y);
+$ print(q == e);

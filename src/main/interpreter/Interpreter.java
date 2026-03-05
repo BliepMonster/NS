@@ -94,6 +94,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
             case GTEQ -> expr.left.accept(this).gte(expr.right.accept(this));
             case EQEQ -> expr.left.accept(this).eq(expr.right.accept(this));
             case BANG_EQ -> expr.left.accept(this).neq(expr.right.accept(this));
+            case PIPE -> expr.left.accept(this).merge(expr.right.accept(this));
             default -> throw new RuntimeException("Invalid operator: " + expr.op);
         };
     }
@@ -263,6 +264,13 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
             return f.body.accept(this);
         } finally {
             scope = oldScope;
+        }
+    }
+    public Value visitCatchExpression(CatchExpression expr) {
+        try {
+            return expr.expr.accept(this);
+        } catch (InvalidOperationException e) {
+            return expr.fallback.accept(this);
         }
     }
 }

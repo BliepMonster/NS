@@ -181,4 +181,7 @@ public final class VectorValue extends Value {
         elements[(int) n.number] = nw;
         return w;
     }
+    public Value merge(Value v) {
+        throw new InvalidOperationException("Cannot merge a vector with an object");
+    }
 }

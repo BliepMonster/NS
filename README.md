@@ -55,6 +55,14 @@ $ print (a.expand(3)+b) // (2, 4, 3)
 ### New operators
 * `?` -> converts a value to a boolean. For example, null, "", or 0 would be false, and "abc", 12, and [1, 2] would be true.
 * `#` -> converts a value to an integer. For example, null or "0" would be 0, while "12" would be 12 and true would be 1. Lists and vectors give their length.
+* `|` -> merges two functions or lists. For functions, for 2 args f and g return function h where h(args) = f(g(args)). For lists: for 2 args l and m return new list containing all elements of l and all of m.
+### Catch
+Use the catch keyword to catch errors:
+```
+obj = () -> null-1; // errors
+o = obj() catch 1;
+$print(o); // prints 1
+```
 ### Operator overloading
 You can use functions to overload operators in objects.
 List of function names:
@@ -73,3 +81,4 @@ List of function names:
 * _bool = boolean conversion(? operator)
 * _num = numeric conversion (# operator)
 * _str = string conversion (for printing)
+* _merge = function merging

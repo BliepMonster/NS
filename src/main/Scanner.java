@@ -40,6 +40,7 @@ public class Scanner {
             case '+': return makeToken(match('=') ? PLUS_EQ : PLUS);
             case '-': return makeToken(match('=') ? MINUS_EQ : match('>') ? ARROW : MINUS);
             case '*': return makeToken(match('*') ? match('=') ? EXP_EQ : EXP : match('=') ? STAR_EQ : STAR);
+            case '|': return makeToken(PIPE);
             case '/': {
                 if (match('/')) {
                     while (!match('\n') && !isAtEnd())
@@ -74,7 +75,6 @@ public class Scanner {
             else return makeToken(DOT);
             case ',': return makeToken(COMMA);
             case ';': return makeToken(SEMICOLON);
-            case '`': return makeToken(BACKTICK);
             case '"', '\'': return string(c);
             case '\0': return makeToken(EOF);
             default: {
@@ -105,7 +105,7 @@ public class Scanner {
             case "null" -> NULL;
             case "class" -> CLASS;
             case "return" -> RETURN;
-            case "new" -> NEW;
+            case "catch" -> CATCH;
             case "or" -> OR;
             case "and" -> AND;
             case "this" -> THIS;

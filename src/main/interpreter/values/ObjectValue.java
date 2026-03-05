@@ -153,4 +153,10 @@ public final class ObjectValue extends Value {
     public Value setIndex(Value v, Value w) {
         throw new InvalidOperationException("Cannot set index in an object");
     }
+    public Value merge(Value v) {
+        if (fields.containsKey("_merge")) {
+            return fields.get("_merge").call(List.of(v));
+        }
+        throw new InvalidOperationException("No merge operator found for object");
+    }
 }
