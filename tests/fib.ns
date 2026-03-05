@@ -1,6 +1,16 @@
-Object = class() {};
-o = Object();
-o._add = (x) -> {
-    $println("add");
-};
-o + o;
+/*
+ONE LINER FIBONACCI SEQUENCE
+$ denotes native functions (print, input)
+(...) -> ... denotes lambda functions
+(...)::... denotes a loop. it will evaluate the expression and add it to a list
+# converts to a number
+? converts to a boolean
+*/
+$ print(
+    ((tmp1, tmp2, tmp3, c) ->
+        (
+            (until) -> (c <= until)::
+                tmp3 + #!?(c = c + 1 + #!?(tmp1 = tmp2) + #!?(tmp2 = tmp3) + #!?(tmp3 = tmp1+tmp2))
+        )
+    )(0, 0, 1, 1)(#$input())
+);

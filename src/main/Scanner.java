@@ -47,7 +47,7 @@ public class Scanner {
                     line++;
                     return null;
                 } else if (match('*')) {
-                    while (!match('*') || !match('/')) {
+                    while (!match('*') && !match('/')) {
                         if (match('\n'))
                             line++;
                         advance();

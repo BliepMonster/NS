@@ -198,17 +198,28 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
         }
     }
     public Value visitNativeFunctionCallExpression(NativeFunctionCallExpression expr) {
+        if (expr.name.equals("ignoreWhileResult")) {
+            if (expr.args.size() != 1) {
+                throw new RuntimeException("ignoreWhileResult expects 1 argument");
+            }
+            Expression cond = expr.args.getFirst();
+            if (!(cond instanceof LoopExpression loop)) {
+                throw new RuntimeException("ignoreWhileResult expects a loop expression");
+            }
+            return evaluateLoop(loop, LoopEvaluationStrategy.NO_ELEMENTS);
+        }
         switch (expr.name) {
-            case "print": {
+            case "print" -> {
                 Value v = expr.args.getFirst().accept(this);
                 System.out.print(v.toString());
             }
-            case "input": {
+            case "input" -> {
+                System.out.println();
                 System.out.print("> ");
                 String input = System.console().readLine();
                 return new StringValue(input, this);
             }
-            case "println": {
+            case "println" -> {
                 Value v = expr.args.getFirst().accept(this);
                 System.out.println(v.toString());
             }
