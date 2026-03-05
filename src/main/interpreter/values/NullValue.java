@@ -70,4 +70,10 @@ public final class NullValue extends Value {
     public Value toNumber() {
         return new NumericValue(0, executor);
     }
+    public Value setMember(String s, Value v) {
+        throw new InvalidOperationException("Cannot set member value "+s+" in a null");
+    }
+    public Value setIndex(Value v, Value w) {
+        throw new InvalidOperationException("Cannot set index in a null");
+    }
 }

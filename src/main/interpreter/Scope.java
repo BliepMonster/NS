@@ -39,6 +39,9 @@ public class Scope {
         return lookup("this");
     }
     public void bindThis(Value v) {
-        assign("this", v);
+        variables.put("this", v);
+    }
+    public void assignLocal(String s, Value v) {
+        variables.put(s, v);
     }
 }

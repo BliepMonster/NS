@@ -43,4 +43,6 @@ public sealed abstract class Value permits
     public abstract BooleanValue gte(Value other);
     public abstract Value toNumber();
     public abstract String toString();
+    public abstract Value setMember(String name, Value value);
+    public abstract Value setIndex(Value index, Value value);
 }

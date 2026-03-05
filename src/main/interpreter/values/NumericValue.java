@@ -16,7 +16,7 @@ public final class NumericValue extends Value {
     }
     public Value add(Value v) {
         if (v instanceof StringValue sv) {
-            return new StringValue(number + sv.value, executor);
+            return new StringValue(number + sv.getValue(), executor);
         } else if (v instanceof NumericValue nv) {
             return new NumericValue(number + nv.number, executor);
         } else throw new InvalidOperationException("Cannot add " + v.getClass().getSimpleName() + " to a number (number on left side)");
@@ -92,5 +92,11 @@ public final class NumericValue extends Value {
     }
     public String toString() {
         return Double.toString(this.number);
+    }
+    public Value setMember(String s, Value v) {
+        throw new InvalidOperationException("Cannot set member value "+s+" in a number");
+    }
+    public Value setIndex(Value v, Value w) {
+        throw new InvalidOperationException("Cannot set index in a number");
     }
 }

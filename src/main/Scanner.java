@@ -76,12 +76,13 @@ public class Scanner {
             case ';': return makeToken(SEMICOLON);
             case '`': return makeToken(BACKTICK);
             case '"', '\'': return string(c);
+            case '\0': return makeToken(EOF);
             default: {
                 if (isNumber(c))
                     return number(c);
                 else if (isAlpha(c))
                     return identifier();
-                throw new ScannerException("Invalid character");
+                throw new ScannerException("Invalid character: "+c+" (id "+(int) c+")");
             }
         }
     }
@@ -162,9 +163,7 @@ public class Scanner {
         while (true) {
             char c = peek();
             switch (c) {
-                case ' ', '\t', '\0' -> {
-                    advance();
-                }
+                case ' ', '\t', '\r' -> advance();
                 case '\n' -> {
                     line++;
                     advance();

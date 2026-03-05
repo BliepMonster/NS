@@ -12,5 +12,6 @@ public interface Executor {
     void execute(Statement stmt);
     // fn is the function to call
     // args is the list of arguments
-    Value callFunction(InterpretedFunctionValue fn, List<Value> args);
+    // context is This or NULL
+    Value callFunction(InterpretedFunctionValue fn, List<Value> args, Value context);
 }

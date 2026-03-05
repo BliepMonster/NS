@@ -14,7 +14,11 @@ public final class ObjectValue extends Value {
         this.executor = executor;
         this.fields = new HashMap<>();
         for (Map.Entry<String, Expression> expr : cv.fields.entrySet()) {
-            fields.put(expr.getKey(), executor.evaluate(expr.getValue()));
+            Value v = executor.evaluate(expr.getValue());
+            if (v instanceof InterpretedFunctionValue iv) {
+                v = iv.toMethod(this);
+            }
+            fields.put(expr.getKey(), v);
         }
     }
     public Value add(Value v) {
@@ -141,6 +145,12 @@ public final class ObjectValue extends Value {
         Value val = fields.get("_str").call(List.of());
         if (!(val instanceof StringValue sv))
             throw new InvalidOperationException("Cannot convert an object to a string");
-        return sv.value;
+        return sv.getValue();
+    }
+    public Value setMember(String s, Value v) {
+        return fields.put(s, v);
+    }
+    public Value setIndex(Value v, Value w) {
+        throw new InvalidOperationException("Cannot set index in an object");
     }
 }

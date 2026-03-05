@@ -166,4 +166,19 @@ public final class VectorValue extends Value {
         sb.append(')');
         return sb.toString();
     }
+    public Value setMember(String s , Value v) {
+        throw new InvalidOperationException("Cannot set member of vector");
+    }
+    public Value setIndex(Value v, Value w) {
+        if (!(v instanceof NumericValue n))
+            throw new InvalidOperationException("Index must be numeric");
+        if (n.number < 0 || n.number >= elements.length)
+            throw new InvalidOperationException("Index out of bounds");
+        if (n.number % 1 != 0)
+            throw new InvalidOperationException("Index must be an integer");
+        if (!(w instanceof NumericValue nw))
+            throw new InvalidOperationException("Cannot set index of vector to non-numeric");
+        elements[(int) n.number] = nw;
+        return w;
+    }
 }

@@ -167,4 +167,10 @@ public abstract non-sealed class CompiledFunctionValue extends Value {
     public Value toNumber() {
         throw new UnsupportedOperationException("Cannot convert a function to a number");
     }
+    public Value setMember(String s, Value v) {
+        throw new UnsupportedOperationException("Cannot set member value "+s+" in a function");
+    }
+    public Value setIndex(Value v, Value w) {
+        throw new UnsupportedOperationException("Cannot set index in a function");
+    }
 }

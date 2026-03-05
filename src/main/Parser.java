@@ -164,7 +164,7 @@ public class Parser {
             case FALSE -> new LiteralExpression(false);
             case NULL -> new LiteralExpression(null);
             case NUMBER -> new LiteralExpression(Double.parseDouble(t.text()));
-            case STRING -> new LiteralExpression(t.text());
+            case STRING -> new LiteralExpression(t.text().substring(1, t.text().length() - 1));
             case IDENTIFIER -> new VariableLookupExpression(t.text());
             case LPAREN -> paren();
             case CLASS -> classDeclaration();

@@ -5,7 +5,7 @@ import main.interpreter.Executor;
 import java.util.List;
 
 public final class StringValue extends Value {
-    public final String value;
+    private String value;
     public final Executor executor;
     public StringValue(String value, Executor executor) {
         this.value = value;
@@ -13,6 +13,9 @@ public final class StringValue extends Value {
     }
     public Value add(Value v) {
         return new StringValue(value+v.toString(), executor);
+    }
+    public String getValue() {
+        return value;
     }
     public String toString() {
         return value;
@@ -85,5 +88,24 @@ public final class StringValue extends Value {
     }
     public Value toNumber() {
         return new NumericValue(Double.parseDouble(value), executor);
+    }
+    public Value setMember(String s, Value v) {
+        throw new InvalidOperationException("Cannot set member value "+s+" in a string");
+    }
+    public Value setIndex(Value v, Value w) {
+        if (!(v instanceof NumericValue nv))
+            throw new InvalidOperationException("Cannot set index in a string by a non-number");
+        if (nv.number < 0)
+            throw new InvalidOperationException("Cannot set index in a string by a negative number");
+        if (nv.number >= value.length())
+            throw new InvalidOperationException("Cannot set index in a string by a number larger than "+value.length());
+        if (nv.number % 1 != 0)
+            throw new InvalidOperationException("Cannot set index in a string by a non-integer number");
+        if (!(w instanceof StringValue sv))
+            throw new InvalidOperationException("Cannot set index in a string by a non-string");
+        if (sv.value.length() > 1)
+            throw new InvalidOperationException("Cannot set index in a string by a string longer than 1 character");
+        this.value = this.value.substring(0, (int) nv.number) + sv.value + this.value.substring((int) nv.number+1);
+        return this;
     }
 }

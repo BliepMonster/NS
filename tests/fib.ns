@@ -1,0 +1,6 @@
+Object = class() {};
+o = Object();
+o._add = (x) -> {
+    $println("add");
+};
+o + o;

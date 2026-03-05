@@ -72,4 +72,10 @@ public final class InterpretedClassValue extends Value {
     public String toString() {
         return "<class>";
     }
+    public Value setMember(String s , Value v) {
+        throw new InvalidOperationException("Cannot set member value "+s+" in a class");
+    }
+    public Value setIndex(Value v, Value w) {
+        throw new InvalidOperationException("Cannot set index in a class");
+    }
 }

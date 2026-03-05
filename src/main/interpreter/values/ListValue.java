@@ -142,4 +142,17 @@ public final class ListValue extends Value {
         sb.append("]");
         return sb.toString();
     }
+    public Value setMember(String s , Value v) {
+        throw new InvalidOperationException("Can't set member value "+s+" in a list");
+    }
+    public Value setIndex(Value v, Value w) {
+        if (!(v instanceof NumericValue nv))
+            throw new InvalidOperationException("Can't set index in a list by a non-number");
+        if (nv.number < 0)
+            throw new InvalidOperationException("Can't set index in a list by a negative number");
+        if (nv.number >= elements.size())
+            throw new InvalidOperationException("Can't set index in a list by a number larger than "+elements.size());
+        this.elements.set((int) nv.number, w);
+        return w;
+    }
 }

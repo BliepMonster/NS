@@ -7,7 +7,7 @@ import main.interpreter.Scope;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class InterpretedFunctionValue extends Value {
+public sealed class InterpretedFunctionValue extends Value permits MethodValue {
     public final Executor executor;
     public final ArrayList<String> parameters;
     public final Scope closure;
@@ -17,6 +17,9 @@ public final class InterpretedFunctionValue extends Value {
         this.body = body;
         this.executor = executor;
         this.closure = closure;
+    }
+    public MethodValue toMethod(Value context) {
+        return new MethodValue(this, context);
     }
     public Value add(Value v) {
         if (!(v instanceof CompiledFunctionValue)) {
@@ -137,7 +140,7 @@ public final class InterpretedFunctionValue extends Value {
         if (args.size() != parameters.size()) {
             throw new InvalidOperationException("Expected "+parameters.size()+" arguments, got "+args.size());
         }
-        return executor.callFunction(this, args);
+        return executor.callFunction(this, args, null);
     }
     public BooleanValue eq(Value v) {
         return new BooleanValue(equals(v), executor);
@@ -179,5 +182,11 @@ public final class InterpretedFunctionValue extends Value {
     }
     public String toString() {
         return "<interpreted function>";
+    }
+    public Value setMember(String s, Value v) {
+        throw new UnsupportedOperationException("Cannot set member value "+s+" in a function");
+    }
+    public Value setIndex(Value v, Value w) {
+        throw new UnsupportedOperationException("Cannot set index in a function");
     }
 }

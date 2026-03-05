@@ -11,7 +11,7 @@ public final class BooleanValue extends Value {
     }
     public Value add(Value v) {
         if (v instanceof StringValue sv) {
-            return new StringValue(value + sv.value, executor);
+            return new StringValue(value + sv.getValue(), executor);
         }
         throw new InvalidOperationException("Cannot add boolean values");
     }
@@ -73,5 +73,11 @@ public final class BooleanValue extends Value {
     }
     public String toString() {
         return value ? "true" : "false";
+    }
+    public Value setMember(String s, Value v) {
+        throw new InvalidOperationException("Cannot set member value "+s+" in a boolean");
+    }
+    public Value setIndex(Value v, Value w) {
+        throw new InvalidOperationException("Cannot set index in a boolean");
     }
 }
