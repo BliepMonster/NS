@@ -1,3 +1,3 @@
-$println(""+(q = (o = (Object = class() { .y = 2, ._add = (obj) -> ((y) -> ?((obj = Object()).y = y) ? obj : obj)(this.y+obj.y), ._eq = (obj) -> this.y == obj.y, ._str = () -> $str(this.y), ._num = () -> this.y})())+(p = Object()))+"
+$println($str(((q = (o = (Object = class() { .y = 2, ._add = (obj) -> ((y) -> ?((obj = Object()).y = y) ? obj : obj)(this.y+obj.y), ._eq = (obj) -> this.y == obj.y, ._str = () -> $str(this.y), ._num = () -> this.y})())+(p = Object()))))+"
 "+(e = p + o)+"
 "+(e == q));

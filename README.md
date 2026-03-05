@@ -82,3 +82,10 @@ List of function names:
 * _num = numeric conversion (# operator)
 * _str = string conversion (for printing)
 * _merge = function merging
+
+## Example program
+```
+$ print(((tmp1, tmp2, tmp3, c) -> ((until) -> (c <= until)::tmp3 + 0*(c = c + 1 + 0*(tmp1 = tmp2) + 0*(tmp2 = tmp3) + 0*(tmp3 = tmp1+tmp2))))(0, 0, 1, 1)(200));
+```
+
+This prints the first 200 numbers in the fibonacci sequence.
