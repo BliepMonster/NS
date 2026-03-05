@@ -1,17 +1,3 @@
-Object = class() {
-    .y = 2,
-    ._add = (obj) -> build_object(this.y+obj.y),
-    ._eq = (obj) -> this.y == obj.y
-};
-build_object = (y) -> {
-    obj = Object();
-    obj.y = y;
-    return obj;
-};
-o = Object();
-p = Object();
-q = o + p;
-e = p + o;
-$ println(q.y);
-$ println (e.y);
-$ print(q == e);
+$println(""+(q = (o = (Object = class() { .y = 2, ._add = (obj) -> ((y) -> ?((obj = Object()).y = y) ? obj : obj)(this.y+obj.y), ._eq = (obj) -> this.y == obj.y, ._str = () -> $str(this.y), ._num = () -> this.y})())+(p = Object()))+"
+"+(e = p + o)+"
+"+(e == q));

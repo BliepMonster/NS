@@ -233,6 +233,9 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
                 Value v = expr.args.getFirst().accept(this);
                 System.out.println(v.toString());
             }
+            case "str" -> {
+                return new StringValue(expr.args.getFirst().accept(this).toString(), this);
+            }
         }
         return NullValue.INSTANCE;
     }
