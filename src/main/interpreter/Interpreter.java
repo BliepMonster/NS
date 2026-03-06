@@ -107,6 +107,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
             case EQEQ -> expr.left.accept(this).eq(expr.right.accept(this));
             case BANG_EQ -> expr.left.accept(this).neq(expr.right.accept(this));
             case PIPE -> expr.left.accept(this).merge(expr.right.accept(this));
+            case IN -> expr.right.accept(this).contains(expr.left.accept(this));
             default -> throw new RuntimeException("Invalid operator: " + expr.op);
         };
     }

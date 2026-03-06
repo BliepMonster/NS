@@ -112,6 +112,7 @@ public class Scanner {
             case "enum" -> ENUM;
             case "_" -> UNDERSCORE;
             case "match" -> MATCH;
+            case "in" -> IN;
             default -> IDENTIFIER;
         };
     }

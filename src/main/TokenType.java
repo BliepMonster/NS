@@ -63,6 +63,7 @@ public enum TokenType {
 
     OR,
     AND,
+    IN,
 
     PIPE,
 

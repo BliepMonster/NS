@@ -50,4 +50,7 @@ public sealed abstract class Value permits
     public abstract Value setMember(String name, Value value);
     public abstract Value setIndex(Value index, Value value);
     public abstract Value merge(Value v);
+    public Value contains(Value v) {
+        throw new InvalidOperationException("Cannot use 'in' operator on this value");
+    }
 }

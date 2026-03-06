@@ -117,10 +117,16 @@ public class Parser {
         return expr;
     }
     Expression comparison() {
-        Expression expr = term();
+        Expression expr = contains();
         if (match(LT, GT, LTEQ, GTEQ)) {
             return new BinaryExpression(expr, previous(), comparison());
         }
+        return expr;
+    }
+    Expression contains() {
+        Expression expr = term();
+        if (match(IN))
+            return new BinaryExpression(expr, previous(), contains());
         return expr;
     }
     Expression term() {
