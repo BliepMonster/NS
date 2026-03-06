@@ -22,7 +22,11 @@ public sealed abstract class Value permits
         // booleans
         BooleanValue,
         // null
-        NullValue
+        NullValue,
+        // enums
+        EnumValue,
+        // enum handles
+        EnumHandleValue
 {
     public abstract Value add(Value other);
     public abstract Value sub(Value other);

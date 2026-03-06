@@ -109,6 +109,7 @@ public class Scanner {
             case "or" -> OR;
             case "and" -> AND;
             case "this" -> THIS;
+            case "enum" -> ENUM;
             default -> IDENTIFIER;
         };
     }

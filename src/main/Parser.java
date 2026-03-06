@@ -190,6 +190,7 @@ public class Parser {
             case RETURN -> returnExpression();
             case LBRACKET -> list();
             case DOLLAR -> nativeCall();
+            case ENUM -> enumDeclaration();
             default -> throw new ParserException(t.line(), "Expect expression.");
         };
     }
@@ -328,5 +329,17 @@ public class Parser {
         }
         consume(RBRACKET, "Expect ']' after list.");
         return new ListExpression(exprs);
+    }
+    Expression enumDeclaration() {
+        consume(LBRACE, "Expect '{' before enum body.");
+        ArrayList<String> mems = new ArrayList<>();
+        if (!check(RBRACE)) {
+            do {
+                consume(IDENTIFIER, "Expect enum name.");
+                mems.add(previous().text());
+            } while (match(COMMA));
+        }
+        consume(RBRACE, "Expect '}' after enum body.");
+        return new EnumDeclarationExpression(mems);
     }
 }

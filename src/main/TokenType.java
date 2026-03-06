@@ -5,6 +5,7 @@ public enum TokenType {
     RETURN, // optional expression, otherwise NULL
     THIS,
     CATCH,
+    ENUM,
 
     IDENTIFIER,
 

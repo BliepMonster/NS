@@ -288,4 +288,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
             return expr.fallback.accept(this);
         }
     }
+    public Value visitEnumDeclarationExpression(EnumDeclarationExpression expr) {
+        return new EnumValue(expr.members, this);
+    }
 }
