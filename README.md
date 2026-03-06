@@ -124,6 +124,17 @@ $ print(b); // "one"
 
 This does not support advanced pattern matching, only simple equality.
 
+### Ranges
+
+Ranges can be created using the .. operator:
+```
+r = 0..10;
+$ print(1 in r);
+```
+
+They can be both in ascending order and descending order, although this currently has no effec on the range.
+Ranges can currently only be used for number bounds checking using the `in` operator.
+
 ## Example program
 ```
 $ print(((tmp1, tmp2, tmp3, c) -> ((until) -> (c <= until)::tmp3 + 0*(c += 1) + (0*(tmp1 = tmp2) + 0*(tmp2 = tmp3) + 0*(tmp3 = tmp1+tmp2))))(0, 0, 1, 1)(200));
@@ -131,6 +142,5 @@ $ print(((tmp1, tmp2, tmp3, c) -> ((until) -> (c <= until)::tmp3 + 0*(c += 1) + 
 
 This prints the first 200 numbers in the fibonacci sequence.
 ## Future plans
-* Range values (0..10)
 * Dictionaries and sets
 * Expand stdlib
