@@ -3,8 +3,14 @@ package main.interpreter;
 import main.*;
 import main.expr.*;
 import main.interpreter.values.*;
+import main.interpreter.values.builtins.*;
+import main.interpreter.values.builtins.BooleanValue;
+import main.interpreter.values.builtins.NullValue;
+import main.interpreter.values.builtins.NumericValue;
+import main.interpreter.values.builtins.StringValue;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static main.TokenType.*;
@@ -320,5 +326,16 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
             return new RangeValue(n1.number, n2.number, RangeValue.DESCENDING, this);
         }
         return new RangeValue(n1.number, n2.number, RangeValue.ASCENDING, this);
+    }
+    public Value visitDictionaryExpression(DictionaryExpression expr) {
+        HashMap<Value, Value> map = new HashMap<>();
+        for (DictionaryExpression.Pair pair : expr.pairs) {
+            Value key = pair.key().accept(this);
+            Value value = pair.value().accept(this);
+            if (map.containsKey(key))
+                throw new RuntimeException("Map contains same key twice");
+            map.put(key, value);
+        }
+        return new DictionaryValue(map, this);
     }
 }

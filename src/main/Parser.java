@@ -210,6 +210,12 @@ public class Parser {
             case DOLLAR -> nativeCall();
             case ENUM -> enumDeclaration();
             case MATCH -> match();
+            case MOD -> {
+                if (match(LBRACE))
+                    yield dictionary();
+                else
+                    throw new ParserException(t.line(), "Expect expression.");
+            }
             default -> throw new ParserException(t.line(), "Expect expression.");
         };
     }
@@ -383,5 +389,18 @@ public class Parser {
         }
         consume(RBRACE, "Expect '}' after match body or default case.");
         return new MatchExpression(match, cases, defaultCase);
+    }
+    Expression dictionary() {
+        ArrayList<DictionaryExpression.Pair> pairs = new ArrayList<>();
+        if (!check(RBRACE)) {
+            do {
+                Expression key = expression();
+                consume(COLON, "Expect ':' after key.");
+                Expression value = expression();
+                pairs.add(new DictionaryExpression.Pair(key, value));
+            } while (match(COMMA));
+        }
+        consume(RBRACE, "Expect '}' after dictionary definition");
+        return new DictionaryExpression(pairs);
     }
 }

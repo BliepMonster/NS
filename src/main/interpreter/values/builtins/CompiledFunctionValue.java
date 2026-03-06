@@ -1,65 +1,57 @@
-package main.interpreter.values;
+package main.interpreter.values.builtins;
 
-import main.expr.Expression;
 import main.interpreter.Executor;
-import main.interpreter.Scope;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public sealed class InterpretedFunctionValue extends Value permits MethodValue {
+public abstract non-sealed class CompiledFunctionValue extends Value {
     public final Executor executor;
-    public final ArrayList<String> parameters;
-    public final Scope closure;
-    public final Expression body;
-    public InterpretedFunctionValue(ArrayList<String> parameters, Expression body, Executor executor, Scope closure) {
-        this.parameters = parameters;
-        this.body = body;
+    public CompiledFunctionValue(Executor executor) {
         this.executor = executor;
-        this.closure = closure;
-    }
-    public MethodValue toMethod(Value context) {
-        return new MethodValue(this, context);
     }
     public Value add(Value v) {
         if (!(v instanceof CompiledFunctionValue)) {
             if (v instanceof InterpretedFunctionValue iv) {
                 return new CompiledFunctionValue(executor) {
                     public Value call(List<Value> args) {
-                        return InterpretedFunctionValue.this.call(args).add(iv.call(args));
+                        return CompiledFunctionValue.this.call(args).add(iv.call(args));
                     }
                 };
             }
             return new CompiledFunctionValue(executor) {
                 public Value call(List<Value> args) {
-                    return InterpretedFunctionValue.this.call(args).add(v);
+                    return CompiledFunctionValue.this.call(args).add(v);
+                }
+            };
+        } else {
+            return new CompiledFunctionValue(executor) {
+                public Value call(List<Value> args) {
+                    return CompiledFunctionValue.this.call(args).add(v.call(args));
                 }
             };
         }
-        return new CompiledFunctionValue(executor) {
-            public Value call(List<Value> args) {
-                return InterpretedFunctionValue.this.call(args).add(v.call(args));
-            }
-        };
+    }
+    public String toString() {
+        return "<generated function>";
     }
     public Value sub(Value v) {
         if (!(v instanceof CompiledFunctionValue)) {
             if (v instanceof InterpretedFunctionValue iv) {
                 return new CompiledFunctionValue(executor) {
                     public Value call(List<Value> args) {
-                        return InterpretedFunctionValue.this.call(args).sub(iv.call(args));
+                        return CompiledFunctionValue.this.call(args).sub(iv.call(args));
                     }
                 };
             }
             return new CompiledFunctionValue(executor) {
                 public Value call(List<Value> args) {
-                    return InterpretedFunctionValue.this.call(args).sub(v);
+                    return CompiledFunctionValue.this.call(args).sub(v);
                 }
             };
         } else {
             return new CompiledFunctionValue(executor) {
                 public Value call(List<Value> args) {
-                    return InterpretedFunctionValue.this.call(args).sub(v.call(args));
+                    return CompiledFunctionValue.this.call(args).sub(v.call(args));
                 }
             };
         }
@@ -69,19 +61,19 @@ public sealed class InterpretedFunctionValue extends Value permits MethodValue {
             if (v instanceof InterpretedFunctionValue iv) {
                 return new CompiledFunctionValue(executor) {
                     public Value call(List<Value> args) {
-                        return InterpretedFunctionValue.this.call(args).mul(iv.call(args));
+                        return CompiledFunctionValue.this.call(args).mul(iv.call(args));
                     }
                 };
             }
             return new CompiledFunctionValue(executor) {
                 public Value call(List<Value> args) {
-                    return InterpretedFunctionValue.this.call(args).mul(v);
+                    return CompiledFunctionValue.this.call(args).mul(v);
                 }
             };
         } else {
             return new CompiledFunctionValue(executor) {
                 public Value call(List<Value> args) {
-                    return InterpretedFunctionValue.this.call(args).mul(v.call(args));
+                    return CompiledFunctionValue.this.call(args).mul(v.call(args));
                 }
             };
         }
@@ -91,19 +83,19 @@ public sealed class InterpretedFunctionValue extends Value permits MethodValue {
             if (v instanceof InterpretedFunctionValue iv) {
                 return new CompiledFunctionValue(executor) {
                     public Value call(List<Value> args) {
-                        return InterpretedFunctionValue.this.call(args).div(iv.call(args));
+                        return CompiledFunctionValue.this.call(args).div(iv.call(args));
                     }
                 };
             }
             return new CompiledFunctionValue(executor) {
                 public Value call(List<Value> args) {
-                    return InterpretedFunctionValue.this.call(args).div(v);
+                    return CompiledFunctionValue.this.call(args).div(v);
                 }
             };
         } else {
             return new CompiledFunctionValue(executor) {
                 public Value call(List<Value> args) {
-                    return InterpretedFunctionValue.this.call(args).div(v.call(args));
+                    return CompiledFunctionValue.this.call(args).div(v.call(args));
                 }
             };
         }
@@ -113,19 +105,19 @@ public sealed class InterpretedFunctionValue extends Value permits MethodValue {
             if (v instanceof InterpretedFunctionValue iv) {
                 return new CompiledFunctionValue(executor) {
                     public Value call(List<Value> args) {
-                        return InterpretedFunctionValue.this.call(args).mod(iv.call(args));
+                        return CompiledFunctionValue.this.call(args).mod(iv.call(args));
                     }
                 };
             }
             return new CompiledFunctionValue(executor) {
                 public Value call(List<Value> args) {
-                    return InterpretedFunctionValue.this.call(args).mod(v);
+                    return CompiledFunctionValue.this.call(args).mod(v);
                 }
             };
         } else {
             return new CompiledFunctionValue(executor) {
                 public Value call(List<Value> args) {
-                    return InterpretedFunctionValue.this.call(args).mod(v.call(args));
+                    return CompiledFunctionValue.this.call(args).mod(v.call(args));
                 }
             };
         }
@@ -136,40 +128,12 @@ public sealed class InterpretedFunctionValue extends Value permits MethodValue {
     public Value index(Value v) {
         throw new UnsupportedOperationException("Cannot index a function");
     }
-    public Value call(List<Value> args) {
-        if (args.size() != parameters.size()) {
-            throw new InvalidOperationException("Expected "+parameters.size()+" arguments, got "+args.size());
-        }
-        return executor.callFunction(this, args, null);
-    }
+    public abstract Value call(List<Value> args);
     public BooleanValue eq(Value v) {
         return BooleanValue.fromBoolean(equals(v));
     }
-    public Value neg() {
-        return new CompiledFunctionValue(executor) {
-            public Value call(List<Value> args) {
-                return InterpretedFunctionValue.this.call(args).neg();
-            }
-        };
-    }
-    public Value inv() {
-        return new CompiledFunctionValue(executor) {
-            public Value call(List<Value> args) {
-                return InterpretedFunctionValue.this.call(args).inv();
-            }
-        };
-    }
-    public BooleanValue isTruthy() {
-        return BooleanValue.fromBoolean(true);
-    }
     public BooleanValue neq(Value v) {
         return BooleanValue.fromBoolean(!equals(v));
-    }
-    public BooleanValue lt(Value v) {
-        throw new UnsupportedOperationException("Cannot compare a function to a number");
-    }
-    public BooleanValue lte(Value v) {
-        throw new UnsupportedOperationException("Cannot compare a function to a number");
     }
     public BooleanValue gt(Value v) {
         throw new UnsupportedOperationException("Cannot compare a function to a number");
@@ -177,11 +141,31 @@ public sealed class InterpretedFunctionValue extends Value permits MethodValue {
     public BooleanValue gte(Value v) {
         throw new UnsupportedOperationException("Cannot compare a function to a number");
     }
+    public BooleanValue lt(Value v) {
+        throw new UnsupportedOperationException("Cannot compare a function to a number");
+    }
+    public BooleanValue lte(Value v) {
+        throw new UnsupportedOperationException("Cannot compare a function to a number");
+    }
+    public Value neg() {
+        return new CompiledFunctionValue(executor) {
+            public Value call(List<Value> args) {
+                return CompiledFunctionValue.this.call(args).neg();
+            }
+        };
+    }
+    public Value inv() {
+        return new CompiledFunctionValue(executor) {
+            public Value call(List<Value> args) {
+                return CompiledFunctionValue.this.call(args).inv();
+            }
+        };
+    }
+    public BooleanValue isTruthy() {
+        return BooleanValue.fromBoolean(true);
+    }
     public Value toNumber() {
         throw new UnsupportedOperationException("Cannot convert a function to a number");
-    }
-    public String toString() {
-        return "<interpreted function>";
     }
     public Value setMember(String s, Value v) {
         throw new UnsupportedOperationException("Cannot set member value "+s+" in a function");
@@ -194,19 +178,19 @@ public sealed class InterpretedFunctionValue extends Value permits MethodValue {
             if (v instanceof InterpretedFunctionValue iv) {
                 return new CompiledFunctionValue(executor) {
                     public Value call(List<Value> args) {
-                        return InterpretedFunctionValue.this.call(List.of(iv.call(args)));
+                        return CompiledFunctionValue.this.call((List.of(iv.call(args))));
                     }
                 };
             }
             return new CompiledFunctionValue(executor) {
                 public Value call(List<Value> args) {
-                    return InterpretedFunctionValue.this.call(List.of(v));
+                    return CompiledFunctionValue.this.call(List.of(v));
                 }
             };
         } else {
             return new CompiledFunctionValue(executor) {
                 public Value call(List<Value> args) {
-                    return InterpretedFunctionValue.this.call(List.of(v.call(args)));
+                    return CompiledFunctionValue.this.call(List.of(v.call(args)));
                 }
             };
         }

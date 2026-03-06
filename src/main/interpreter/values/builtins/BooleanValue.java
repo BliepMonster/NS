@@ -1,6 +1,7 @@
-package main.interpreter.values;
+package main.interpreter.values.builtins;
 
 import main.interpreter.Executor;
+import main.interpreter.values.InvalidOperationException;
 
 public final class BooleanValue extends Value {
     public final boolean value;

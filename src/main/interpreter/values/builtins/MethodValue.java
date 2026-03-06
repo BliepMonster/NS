@@ -1,4 +1,6 @@
-package main.interpreter.values;
+package main.interpreter.values.builtins;
+
+import main.interpreter.values.InvalidOperationException;
 
 import java.util.List;
 

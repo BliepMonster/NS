@@ -2,8 +2,8 @@ package main.interpreter;
 
 import main.Statement;
 import main.expr.Expression;
-import main.interpreter.values.InterpretedFunctionValue;
-import main.interpreter.values.Value;
+import main.interpreter.values.builtins.InterpretedFunctionValue;
+import main.interpreter.values.builtins.Value;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package main.interpreter;
 
-import main.interpreter.values.Value;
+import main.interpreter.values.builtins.Value;
 
 public class Return extends RuntimeException {
     public final Value value;

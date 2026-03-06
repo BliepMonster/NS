@@ -14,5 +14,5 @@ $ println(
 $ println(
     (fib = (x) ->
         (x <= 1) ? 1 : fib(x-1)+fib(x-2)
-    )(20)
+    )(10)
 ); // crashes (stack overflow), very slow, generates only fib(n)

@@ -1,7 +1,8 @@
-package main.interpreter.values;
+package main.interpreter.values.builtins;
 
 import main.expr.Expression;
 import main.interpreter.Executor;
+import main.interpreter.values.InvalidOperationException;
 
 import java.util.HashMap;
 import java.util.List;

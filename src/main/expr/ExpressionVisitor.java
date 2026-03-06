@@ -23,4 +23,5 @@ public interface ExpressionVisitor<R> {
     R visitEnumDeclarationExpression(EnumDeclarationExpression expr);
     R visitMatchExpression(MatchExpression expr);
     R visitRangeExpression(RangeExpression expr);
+    R visitDictionaryExpression(DictionaryExpression expr);
 }

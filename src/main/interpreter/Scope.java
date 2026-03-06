@@ -1,6 +1,6 @@
 package main.interpreter;
 
-import main.interpreter.values.Value;
+import main.interpreter.values.builtins.Value;
 
 import java.util.HashMap;
 
