@@ -94,4 +94,7 @@ public final class RangeValue extends Value {
             return BooleanValue.fromBoolean(nv.number >= l && nv.number <= r);
         return BooleanValue.fromBoolean(nv.number <= l && nv.number >= r);
     }
+    public int hashCode() {
+        return (int) (l+r);
+    }
 }

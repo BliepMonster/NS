@@ -79,4 +79,7 @@ public final class NullValue extends Value {
     public Value merge(Value v) {
         throw new InvalidOperationException("Cannot merge a null with a value");
     }
+    public int hashCode() {
+        return 0;
+    }
 }

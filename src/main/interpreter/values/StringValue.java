@@ -111,4 +111,7 @@ public final class StringValue extends Value {
     public Value merge(Value v) {
         throw new InvalidOperationException("Cannot merge a string with a value");
     }
+    public int hashCode() {
+        return value.hashCode();
+    }
 }

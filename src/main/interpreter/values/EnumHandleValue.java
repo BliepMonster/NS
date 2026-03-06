@@ -85,4 +85,7 @@ public final class EnumHandleValue extends Value {
     public Value merge(Value v) {
         throw new InvalidOperationException("Cannot merge an enum handle with a value");
     }
+    public int hashCode() {
+        return name.hashCode();
+    }
 }

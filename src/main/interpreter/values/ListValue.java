@@ -170,4 +170,11 @@ public final class ListValue extends Value {
         }
         return BooleanValue.fromBoolean(false);
     }
+    public int hashCode() {
+        int hashcode = 1;
+        for (Value e : elements) {
+            hashcode = 31 * hashcode + e.hashCode();
+        }
+        return hashcode;
+    }
 }

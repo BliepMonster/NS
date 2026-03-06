@@ -82,4 +82,7 @@ public final class InterpretedClassValue extends Value {
     public Value merge(Value v) {
         throw new InvalidOperationException("Cannot merge a class with a value");
     }
+    public int hashCode() {
+        return fields.hashCode();
+    }
 }

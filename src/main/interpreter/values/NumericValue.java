@@ -102,4 +102,7 @@ public final class NumericValue extends Value {
     public Value merge(Value v) {
         throw new InvalidOperationException("Cannot merge a number with a value");
     }
+    public int hashCode() {
+        return Double.hashCode(number);
+    }
 }

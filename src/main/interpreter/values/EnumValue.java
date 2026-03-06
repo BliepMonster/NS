@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 
 public final class EnumValue extends Value {
-    private HashMap<String, EnumHandleValue> handles;
-    private Executor executor;
+    private final HashMap<String, EnumHandleValue> handles;
+    private final Executor executor;
     public EnumValue(ArrayList<String> handles, Executor executor) {
         this.handles = new HashMap<>();
         for (String handle : handles) {
@@ -88,5 +88,8 @@ public final class EnumValue extends Value {
         newHandles.putAll(ev.handles);
         newHandles.putAll(this.handles);
         return new EnumValue(new ArrayList<>(newHandles.keySet()), executor);
+    }
+    public int hashCode() {
+        return handles.hashCode();
     }
 }

@@ -164,4 +164,7 @@ public final class ObjectValue extends Value {
             throw new InvalidOperationException("Cannot check if an object contains a value");
         return fields.get("_contains").call(List.of(v));
     }
+    public int hashCode() {
+        return fields.hashCode();
+    }
 }

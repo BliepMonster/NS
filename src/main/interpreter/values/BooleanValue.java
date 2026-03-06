@@ -92,4 +92,7 @@ public final class BooleanValue extends Value {
     public Value merge(Value v) {
         throw new InvalidOperationException("Cannot merge a boolean with a value");
     }
+    public int hashCode() {
+        return Boolean.hashCode(value);
+    }
 }

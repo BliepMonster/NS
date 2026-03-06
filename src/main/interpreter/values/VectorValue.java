@@ -184,4 +184,11 @@ public final class VectorValue extends Value {
     public Value merge(Value v) {
         throw new InvalidOperationException("Cannot merge a vector with an object");
     }
+    public int hashCode() {
+        int hashcode = 1;
+        for (NumericValue n : elements) {
+            hashcode = 31 * hashcode + n.hashCode();
+        }
+        return hashcode;
+    }
 }
