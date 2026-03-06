@@ -16,7 +16,7 @@ public class Scope {
     public void assign(String name, Value val) {
         if (variables.containsKey(name)) {
             variables.put(name, val);
-        } else if (contains(name)) {
+        } else if (parent != null && parent.contains(name)) {
             parent.assign(name, val);
         } else {
             variables.put(name, val);
@@ -34,12 +34,14 @@ public class Scope {
             throw new RuntimeException("Variable not found: " + name);
         }
     }
-    // to be overridden by class contexts
+    private Value thisValue;
+
     public Value getThis() {
-        return lookup("this");
+        return thisValue != null ? thisValue : (parent != null ? parent.getThis() : null);
     }
+
     public void bindThis(Value v) {
-        variables.put("this", v);
+        thisValue = v;
     }
     public void assignLocal(String s, Value v) {
         variables.put(s, v);

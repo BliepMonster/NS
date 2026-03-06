@@ -203,6 +203,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
         return new InterpretedClassValue(expr.members, this);
     }
     public Value visitBlockExpression(BlockExpression expr) {
+        scope = new Scope(scope);
         try {
             for (Statement s : expr.statements) {
                 s.accept(this);
@@ -210,6 +211,8 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
             return NullValue.INSTANCE;
         } catch (Return r) {
             return r.value;
+        } finally {
+            scope = scope.parent;
         }
     }
     public Value visitReturnExpression(ReturnExpression expr) {

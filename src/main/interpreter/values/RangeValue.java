@@ -5,14 +5,14 @@ import main.interpreter.Executor;
 import java.util.List;
 
 public final class RangeValue extends Value {
-    public final double min, max;
+    public final double l, r;
     public final boolean order;
     public static final boolean ASCENDING = true,
                                 DESCENDING = false;
     public final Executor executor;
     public RangeValue(double min, double max, boolean order, Executor executor) {
-        this.min = min;
-        this.max = max;
+        this.l = min;
+        this.r = max;
         this.order = order;
         this.executor = executor;
     }
@@ -44,7 +44,7 @@ public final class RangeValue extends Value {
     public BooleanValue eq(Value v) {
         if (!(v instanceof RangeValue rv))
             return BooleanValue.fromBoolean(false);
-        return BooleanValue.fromBoolean(rv.min == min && rv.max == max && rv.order == order);
+        return BooleanValue.fromBoolean(rv.l == l && rv.r == r && rv.order == order);
     }
     public Value neg() {
         throw new InvalidOperationException("Cannot negate a range");
@@ -71,10 +71,12 @@ public final class RangeValue extends Value {
         throw new InvalidOperationException("Cannot compare a range to a number");
     }
     public Value toNumber() {
-        return new NumericValue(max-min, executor);
+        if (order == ASCENDING)
+            return new NumericValue(r-l, executor);
+        return new NumericValue(l-r, executor);
     }
     public String toString() {
-        return "["+min+","+max+"]";
+        return "["+l+","+r+"]";
     }
     public Value setMember(String id, Value v) {
         throw new InvalidOperationException("Cannot set member value "+id+" in a range");
@@ -89,7 +91,7 @@ public final class RangeValue extends Value {
         if (!(v instanceof NumericValue nv))
             throw new InvalidOperationException("Cannot check if a range contains a non-numeric value");
         if (order == ASCENDING)
-            return BooleanValue.fromBoolean(nv.number >= min && nv.number <= max);
-        return BooleanValue.fromBoolean(nv.number <= min && nv.number >= max);
+            return BooleanValue.fromBoolean(nv.number >= l && nv.number <= r);
+        return BooleanValue.fromBoolean(nv.number <= l && nv.number >= r);
     }
 }
