@@ -1,30 +1,24 @@
 package main.interpreter.values.builtins;
 
-import main.interpreter.Executor;
-
 import java.util.List;
 
 public abstract non-sealed class CompiledFunctionValue extends Value {
-    public final Executor executor;
-    public CompiledFunctionValue(Executor executor) {
-        this.executor = executor;
-    }
     public Value add(Value v) {
         if (!(v instanceof CompiledFunctionValue)) {
             if (v instanceof InterpretedFunctionValue iv) {
-                return new CompiledFunctionValue(executor) {
+                return new CompiledFunctionValue() {
                     public Value call(List<Value> args) {
                         return CompiledFunctionValue.this.call(args).add(iv.call(args));
                     }
                 };
             }
-            return new CompiledFunctionValue(executor) {
+            return new CompiledFunctionValue() {
                 public Value call(List<Value> args) {
                     return CompiledFunctionValue.this.call(args).add(v);
                 }
             };
         } else {
-            return new CompiledFunctionValue(executor) {
+            return new CompiledFunctionValue() {
                 public Value call(List<Value> args) {
                     return CompiledFunctionValue.this.call(args).add(v.call(args));
                 }
@@ -37,19 +31,19 @@ public abstract non-sealed class CompiledFunctionValue extends Value {
     public Value sub(Value v) {
         if (!(v instanceof CompiledFunctionValue)) {
             if (v instanceof InterpretedFunctionValue iv) {
-                return new CompiledFunctionValue(executor) {
+                return new CompiledFunctionValue() {
                     public Value call(List<Value> args) {
                         return CompiledFunctionValue.this.call(args).sub(iv.call(args));
                     }
                 };
             }
-            return new CompiledFunctionValue(executor) {
+            return new CompiledFunctionValue() {
                 public Value call(List<Value> args) {
                     return CompiledFunctionValue.this.call(args).sub(v);
                 }
             };
         } else {
-            return new CompiledFunctionValue(executor) {
+            return new CompiledFunctionValue() {
                 public Value call(List<Value> args) {
                     return CompiledFunctionValue.this.call(args).sub(v.call(args));
                 }
@@ -59,19 +53,19 @@ public abstract non-sealed class CompiledFunctionValue extends Value {
     public Value mul(Value v) {
         if (!(v instanceof CompiledFunctionValue)) {
             if (v instanceof InterpretedFunctionValue iv) {
-                return new CompiledFunctionValue(executor) {
+                return new CompiledFunctionValue() {
                     public Value call(List<Value> args) {
                         return CompiledFunctionValue.this.call(args).mul(iv.call(args));
                     }
                 };
             }
-            return new CompiledFunctionValue(executor) {
+            return new CompiledFunctionValue() {
                 public Value call(List<Value> args) {
                     return CompiledFunctionValue.this.call(args).mul(v);
                 }
             };
         } else {
-            return new CompiledFunctionValue(executor) {
+            return new CompiledFunctionValue() {
                 public Value call(List<Value> args) {
                     return CompiledFunctionValue.this.call(args).mul(v.call(args));
                 }
@@ -81,19 +75,19 @@ public abstract non-sealed class CompiledFunctionValue extends Value {
     public Value div(Value v) {
         if (!(v instanceof CompiledFunctionValue)) {
             if (v instanceof InterpretedFunctionValue iv) {
-                return new CompiledFunctionValue(executor) {
+                return new CompiledFunctionValue() {
                     public Value call(List<Value> args) {
                         return CompiledFunctionValue.this.call(args).div(iv.call(args));
                     }
                 };
             }
-            return new CompiledFunctionValue(executor) {
+            return new CompiledFunctionValue() {
                 public Value call(List<Value> args) {
                     return CompiledFunctionValue.this.call(args).div(v);
                 }
             };
         } else {
-            return new CompiledFunctionValue(executor) {
+            return new CompiledFunctionValue() {
                 public Value call(List<Value> args) {
                     return CompiledFunctionValue.this.call(args).div(v.call(args));
                 }
@@ -103,19 +97,19 @@ public abstract non-sealed class CompiledFunctionValue extends Value {
     public Value mod(Value v) {
         if (!(v instanceof CompiledFunctionValue)) {
             if (v instanceof InterpretedFunctionValue iv) {
-                return new CompiledFunctionValue(executor) {
+                return new CompiledFunctionValue() {
                     public Value call(List<Value> args) {
                         return CompiledFunctionValue.this.call(args).mod(iv.call(args));
                     }
                 };
             }
-            return new CompiledFunctionValue(executor) {
+            return new CompiledFunctionValue() {
                 public Value call(List<Value> args) {
                     return CompiledFunctionValue.this.call(args).mod(v);
                 }
             };
         } else {
-            return new CompiledFunctionValue(executor) {
+            return new CompiledFunctionValue() {
                 public Value call(List<Value> args) {
                     return CompiledFunctionValue.this.call(args).mod(v.call(args));
                 }
@@ -148,14 +142,14 @@ public abstract non-sealed class CompiledFunctionValue extends Value {
         throw new UnsupportedOperationException("Cannot compare a function to a number");
     }
     public Value neg() {
-        return new CompiledFunctionValue(executor) {
+        return new CompiledFunctionValue() {
             public Value call(List<Value> args) {
                 return CompiledFunctionValue.this.call(args).neg();
             }
         };
     }
     public Value inv() {
-        return new CompiledFunctionValue(executor) {
+        return new CompiledFunctionValue() {
             public Value call(List<Value> args) {
                 return CompiledFunctionValue.this.call(args).inv();
             }
@@ -176,19 +170,19 @@ public abstract non-sealed class CompiledFunctionValue extends Value {
     public Value merge(Value v) {
         if (!(v instanceof CompiledFunctionValue)) {
             if (v instanceof InterpretedFunctionValue iv) {
-                return new CompiledFunctionValue(executor) {
+                return new CompiledFunctionValue() {
                     public Value call(List<Value> args) {
                         return CompiledFunctionValue.this.call((List.of(iv.call(args))));
                     }
                 };
             }
-            return new CompiledFunctionValue(executor) {
+            return new CompiledFunctionValue() {
                 public Value call(List<Value> args) {
                     return CompiledFunctionValue.this.call(List.of(v));
                 }
             };
         } else {
-            return new CompiledFunctionValue(executor) {
+            return new CompiledFunctionValue() {
                 public Value call(List<Value> args) {
                     return CompiledFunctionValue.this.call(List.of(v.call(args)));
                 }

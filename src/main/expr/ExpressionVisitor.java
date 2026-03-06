@@ -24,4 +24,5 @@ public interface ExpressionVisitor<R> {
     R visitMatchExpression(MatchExpression expr);
     R visitRangeExpression(RangeExpression expr);
     R visitDictionaryExpression(DictionaryExpression expr);
+    R visitSetExpression(SetExpression expr);
 }

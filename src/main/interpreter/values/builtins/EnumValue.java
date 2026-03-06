@@ -1,6 +1,5 @@
 package main.interpreter.values.builtins;
 
-import main.interpreter.Executor;
 import main.interpreter.values.InvalidOperationException;
 
 import java.util.ArrayList;
@@ -9,13 +8,11 @@ import java.util.List;
 
 public final class EnumValue extends Value {
     private final HashMap<String, EnumHandleValue> handles;
-    private final Executor executor;
-    public EnumValue(ArrayList<String> handles, Executor executor) {
+    public EnumValue(ArrayList<String> handles) {
         this.handles = new HashMap<>();
         for (String handle : handles) {
-            this.handles.put(handle, new EnumHandleValue(handle, this, executor));
+            this.handles.put(handle, new EnumHandleValue(handle, this));
         }
-        this.executor = executor;
     }
     public Value add(Value v) {
         throw new InvalidOperationException("Cannot add an enum to a value");
@@ -88,7 +85,7 @@ public final class EnumValue extends Value {
         HashMap<String, EnumHandleValue> newHandles = new HashMap<>(handles);
         newHandles.putAll(ev.handles);
         newHandles.putAll(this.handles);
-        return new EnumValue(new ArrayList<>(newHandles.keySet()), executor);
+        return new EnumValue(new ArrayList<>(newHandles.keySet()));
     }
     public int hashCode() {
         return handles.hashCode();

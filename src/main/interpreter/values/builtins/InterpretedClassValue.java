@@ -1,7 +1,6 @@
 package main.interpreter.values.builtins;
 
 import main.expr.Expression;
-import main.interpreter.Executor;
 import main.interpreter.values.InvalidOperationException;
 
 import java.util.HashMap;
@@ -10,9 +9,7 @@ import java.util.List;
 /// less of a class, more a template for building objects; objects do not hold classes
 public final class InterpretedClassValue extends Value {
     public final HashMap<String, Expression> fields;
-    public final Executor executor;
-    public InterpretedClassValue(HashMap<String, Expression> fields, Executor executor) {
-        this.executor = executor;
+    public InterpretedClassValue(HashMap<String, Expression> fields) {
         this.fields = fields;
     }
     public Value add(Value v) {
@@ -38,7 +35,7 @@ public final class InterpretedClassValue extends Value {
         throw new InvalidOperationException("Cannot index a class");
     }
     public Value call(List<Value> args) {
-        return new ObjectValue(this, executor);
+        return new ObjectValue(this);
     }
     public BooleanValue eq(Value v) {
         return BooleanValue.fromBoolean(equals(v));

@@ -11,6 +11,7 @@ import main.interpreter.values.builtins.StringValue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import static main.TokenType.*;
@@ -27,8 +28,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
     private Scope scope = new Scope();
     private final List<Statement> statements;
     public Interpreter(List<Statement> statements) {
-        NullValue.init(this);
-        BooleanValue.init(this);
+        ExecutorHolder.EXECUTOR = this;
         this.statements = statements;
     }
     public void interpret() {
@@ -141,9 +141,9 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
     }
     public Value visitLiteralExpression(LiteralExpression expr) {
         return switch (expr.value) {
-            case String s -> new StringValue(s, this);
+            case String s -> new StringValue(s);
             case Boolean b -> BooleanValue.fromBoolean(b);
-            case Double d -> new NumericValue(d, this);
+            case Double d -> NumericValue.of(d);
             case null -> NullValue.INSTANCE;
             default -> throw new RuntimeException("Invalid literal: " + expr.value);
         };
@@ -180,7 +180,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
                     case LAST_ONLY -> last;
                     case NO_ELEMENTS -> NullValue.INSTANCE;
                     case FIRST_ONLY -> first;
-                    case ALL_ELEMENTS -> new ListValue(values, this);
+                    case ALL_ELEMENTS -> new ListValue(values);
                 };
             }
             Value res = expr.body.accept(this);
@@ -188,7 +188,8 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
                 first = res;
                 isFirst = false;
             }
-            values.add(res);
+            if (strategy == LoopEvaluationStrategy.ALL_ELEMENTS)
+                values.add(res);
             last = res;
         }
     }
@@ -197,7 +198,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
         for (Token t : expr.args) {
             params.add(t.text());
         }
-        return new InterpretedFunctionValue(params, expr.body, this, scope);
+        return new InterpretedFunctionValue(params, expr.body, scope);
     }
     public Value visitClassDeclarationExpression(ClassDeclarationExpression expr) {
         if (expr.superclass != null) {
@@ -206,7 +207,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
                 throw new RuntimeException("Superclass must be a class");
             expr.members.putAll(sc.fields);
         }
-        return new InterpretedClassValue(expr.members, this);
+        return new InterpretedClassValue(expr.members);
     }
     public Value visitBlockExpression(BlockExpression expr) {
         scope = new Scope(scope);
@@ -239,6 +240,24 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
                 throw new RuntimeException("ignoreWhileResult expects a loop expression");
             }
             return evaluateLoop(loop, LoopEvaluationStrategy.NO_ELEMENTS);
+        } else if (expr.name.equals("last")) {
+            if (expr.args.size() != 1) {
+                throw new RuntimeException("ignoreWhileResult expects 1 argument");
+            }
+            Expression cond = expr.args.getFirst();
+            if (!(cond instanceof LoopExpression loop)) {
+                return cond.accept(this).last();
+            }
+            return evaluateLoop(loop, LoopEvaluationStrategy.LAST_ONLY);
+        } else if (expr.name.equals("first")) {
+            if (expr.args.size() != 1) {
+                throw new RuntimeException("ignoreWhileResult expects 1 argument");
+            }
+            Expression cond = expr.args.getFirst();
+            if (!(cond instanceof LoopExpression loop)) {
+                return cond.accept(this).last();
+            }
+            return evaluateLoop(loop, LoopEvaluationStrategy.FIRST_ONLY);
         }
         switch (expr.name) {
             case "print" -> {
@@ -249,17 +268,17 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
                 System.out.println();
                 System.out.print("> ");
                 String input = System.console().readLine();
-                return new StringValue(input, this);
+                return new StringValue(input);
             }
             case "println" -> {
                 Value v = expr.args.getFirst().accept(this);
                 System.out.println(v.toString());
             }
             case "str" -> {
-                return new StringValue(expr.args.getFirst().accept(this).toString(), this);
+                return new StringValue(expr.args.getFirst().accept(this).toString());
             }
             case "clock" -> {
-                return new NumericValue(System.currentTimeMillis(), this);
+                return NumericValue.of(System.currentTimeMillis());
             }
         }
         return NullValue.INSTANCE;
@@ -269,7 +288,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
         for (Expression e : expr.elements) {
             values.add(e.accept(this));
         }
-        return new ListValue(values, this);
+        return new ListValue(values);
     }
     public Value evaluate(Expression expr) {
         return expr.accept(this);
@@ -297,12 +316,12 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
     public Value visitCatchExpression(CatchExpression expr) {
         try {
             return expr.expr.accept(this);
-        } catch (InvalidOperationException e) {
+        } catch (RuntimeException e) {
             return expr.fallback.accept(this);
         }
     }
     public Value visitEnumDeclarationExpression(EnumDeclarationExpression expr) {
-        return new EnumValue(expr.members, this);
+        return new EnumValue(expr.members);
     }
     public Value visitMatchExpression(MatchExpression expr) {
         Value v = expr.expr.accept(this);
@@ -323,9 +342,9 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
         if (!(v2 instanceof NumericValue n2))
             throw new RuntimeException("Range end must be numeric");
         if (n1.number > n2.number) {
-            return new RangeValue(n1.number, n2.number, RangeValue.DESCENDING, this);
+            return new RangeValue(n1.number, n2.number, RangeValue.DESCENDING);
         }
-        return new RangeValue(n1.number, n2.number, RangeValue.ASCENDING, this);
+        return new RangeValue(n1.number, n2.number, RangeValue.ASCENDING);
     }
     public Value visitDictionaryExpression(DictionaryExpression expr) {
         HashMap<Value, Value> map = new HashMap<>();
@@ -336,6 +355,13 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
                 throw new RuntimeException("Map contains same key twice");
             map.put(key, value);
         }
-        return new DictionaryValue(map, this);
+        return new DictionaryValue(map);
+    }
+    public Value visitSetExpression(SetExpression expr) {
+        HashSet<Value> set = new HashSet<>();
+        for (Expression e : expr.expr) {
+            set.add(e.accept(this));
+        }
+        return new SetValue(set);
     }
 }

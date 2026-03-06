@@ -1,6 +1,5 @@
 package main.interpreter.values.builtins;
 
-import main.interpreter.Executor;
 import main.interpreter.values.*;
 
 import java.util.HashMap;
@@ -9,12 +8,10 @@ import java.util.Map;
 
 public final class DictionaryValue extends Value {
     private final HashMap<Value, Value> map;
-    private final Executor executor;
     private final HashMap<String, CompiledFunctionValue> memberFunctions = new HashMap<>();
-    public DictionaryValue(HashMap<Value, Value> map, Executor executor) {
-        this.executor = executor;
+    public DictionaryValue(HashMap<Value, Value> map) {
         this.map = map;
-        memberFunctions.put("containsKey", new CompiledFunctionValue(executor) {
+        memberFunctions.put("containsKey", new CompiledFunctionValue() {
             @Override
             public Value call(List<Value> args) {
                 if (args.size() != 1)
@@ -22,11 +19,11 @@ public final class DictionaryValue extends Value {
                 return BooleanValue.fromBoolean(map.containsKey(args.getFirst()));
             }
         });
-        memberFunctions.put("containsValue", new CompiledFunctionValue(executor) {
+        memberFunctions.put("containsValue", new CompiledFunctionValue() {
             @Override
             public Value call(List<Value> args) {
                 if (args.size() != 1)
-                    throw new InvalidOperationException("containsKey() takes exactly one argument");
+                    throw new InvalidOperationException("containsValue() takes exactly one argument");
                 return BooleanValue.fromBoolean(map.containsValue(args.getFirst()));
             }
         });
@@ -91,15 +88,17 @@ public final class DictionaryValue extends Value {
         throw new InvalidOperationException("Cannot compare a dictionary to a number");
     }
     public Value toNumber() {
-        return new NumericValue(map.size(), executor);
+        return NumericValue.of(map.size());
     }
     public String toString() {
         StringBuilder sb = new StringBuilder("{");
         for (Map.Entry<Value, Value> entry : map.entrySet()) {
-            sb.append(entry.getKey().toString()).append(": ").append(entry.getValue().toString()).append(", ");
+            sb.append(entry.getKey().toString()).append(": ").append(entry.getValue().toString());
+            sb.append(", ");
         }
-        sb.deleteCharAt(sb.length()-2);
-        sb.deleteCharAt(sb.length()-1);
+        if (!map.isEmpty()) {
+            sb.setLength(sb.length() - 2);
+        }
         sb.append("}");
         return sb.toString();
     }
@@ -115,7 +114,7 @@ public final class DictionaryValue extends Value {
             throw new InvalidOperationException("Cannot merge a dictionary with a value");
         HashMap<Value, Value> newMap = new HashMap<>(map);
         newMap.putAll(dv.map);
-        return new DictionaryValue(newMap, executor);
+        return new DictionaryValue(newMap);
     }
     public Value contains(Value v) {
         return BooleanValue.fromBoolean(map.containsKey(v) || map.containsValue(v));

@@ -1,6 +1,5 @@
 package main.interpreter.values.builtins;
 
-import main.interpreter.Executor;
 import main.interpreter.values.InvalidOperationException;
 
 import java.util.List;
@@ -10,12 +9,10 @@ public final class RangeValue extends Value {
     public final boolean order;
     public static final boolean ASCENDING = true,
                                 DESCENDING = false;
-    public final Executor executor;
-    public RangeValue(double min, double max, boolean order, Executor executor) {
+    public RangeValue(double min, double max, boolean order) {
         this.l = min;
         this.r = max;
         this.order = order;
-        this.executor = executor;
     }
     public Value add(Value v) {
         throw new InvalidOperationException("Cannot add a range to a value");
@@ -73,8 +70,8 @@ public final class RangeValue extends Value {
     }
     public Value toNumber() {
         if (order == ASCENDING)
-            return new NumericValue(r-l, executor);
-        return new NumericValue(l-r, executor);
+            return NumericValue.of(r-l);
+        return NumericValue.of(l-r);
     }
     public String toString() {
         return "["+l+","+r+"]";

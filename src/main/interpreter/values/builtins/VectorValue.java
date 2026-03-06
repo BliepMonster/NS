@@ -13,7 +13,7 @@ public final class VectorValue extends Value {
     public VectorValue(NumericValue[] elements, Executor executor) {
         this.executor = executor;
         this.elements = elements;
-        members.put("expand", new CompiledFunctionValue(executor) {
+        members.put("expand", new CompiledFunctionValue() {
             @Override
             public Value call(List<Value> args) {
                 if (args.size() != 1)
@@ -30,7 +30,7 @@ public final class VectorValue extends Value {
                 NumericValue[] newElements = new NumericValue[(int) nv.number];
                 System.arraycopy(elements, 0, newElements, 0, elements.length);
                 for (int i = elements.length; i < newElements.length; i++) {
-                    newElements[i] = new NumericValue(0, executor);
+                    newElements[i] = NumericValue.ZERO;
                 }
                 return new VectorValue(newElements, executor);
             }
@@ -154,7 +154,7 @@ public final class VectorValue extends Value {
         throw new InvalidOperationException("Cannot compare a vector to a number");
     }
     public Value toNumber() {
-        return new NumericValue(elements.length, executor);
+        return NumericValue.of(elements.length);
     }
     public String toString() {
         StringBuilder sb = new StringBuilder();

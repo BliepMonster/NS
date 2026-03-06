@@ -1,15 +1,16 @@
 // ALGORITHMIC:
+t = $clock();
 $ println(
     ((tmp1, tmp2, tmp3, c) ->
         ((until) ->
-            (c <= until)::tmp3
-                + 0*(c += 1)
-                + (0*(tmp1 = tmp2)
-                + 0*(tmp2 = tmp3)
-                + 0*(tmp3 = tmp1+tmp2))
+            $last((c <= until)::
+                tmp3
+                    + 0*(c += 1)
+                    + 0*(tmp3 = (tmp1 = tmp2)+(tmp2 = tmp3)))
         )
-    )(0, 0, 1, 1)(20)
-); // can generate up to 200000 in a second, generates all items from fib(0) to fib(n)
+    )(0, 0, 1, 1)(1000000)
+); // can generate over 1000000 in a second, fib(n) but can be configured to produce a list instead, very fast
+$ println($clock()-t);
 // RECURSIVE:
 $ println(
     (fib = (x) ->

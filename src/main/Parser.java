@@ -4,6 +4,7 @@ import main.expr.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import static main.TokenType.*;
 
@@ -213,6 +214,8 @@ public class Parser {
             case MOD -> {
                 if (match(LBRACE))
                     yield dictionary();
+                else if (match(LBRACKET))
+                    yield set();
                 else
                     throw new ParserException(t.line(), "Expect expression.");
             }
@@ -402,5 +405,15 @@ public class Parser {
         }
         consume(RBRACE, "Expect '}' after dictionary definition");
         return new DictionaryExpression(pairs);
+    }
+    Expression set() {
+        HashSet<Expression> exprs = new HashSet<>();
+        if (!check(RBRACKET)) {
+            do {
+                exprs.add(expression());
+            } while (match(COMMA));
+        }
+        consume(RBRACKET, "Expect ']' after set.");
+        return new SetExpression(exprs);
     }
 }

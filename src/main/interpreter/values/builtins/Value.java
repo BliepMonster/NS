@@ -32,7 +32,9 @@ public sealed abstract class Value permits
         // ranges
         RangeValue,
         // maps
-        DictionaryValue
+        DictionaryValue,
+        // hash sets
+        SetValue
 {
     public abstract Value add(Value other);
     public abstract Value sub(Value other);
@@ -61,5 +63,11 @@ public sealed abstract class Value permits
     }
     public boolean equals(Object other) {
         return other instanceof Value v && eq(v).value;
+    }
+    public Value last() {
+        throw new InvalidOperationException("Cannot get last element of a value");
+    }
+    public Value first() {
+        throw new InvalidOperationException("Cannot get first element of a value");
     }
 }

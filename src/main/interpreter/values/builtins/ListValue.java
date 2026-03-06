@@ -1,6 +1,5 @@
 package main.interpreter.values.builtins;
 
-import main.interpreter.Executor;
 import main.interpreter.values.InvalidOperationException;
 
 import java.util.ArrayList;
@@ -8,27 +7,25 @@ import java.util.HashMap;
 import java.util.List;
 
 public final class ListValue extends Value {
-    private ArrayList<Value> elements;
-    public final Executor executor;
-    private HashMap<String, CompiledFunctionValue> members = new HashMap<>();
-    public ListValue(ArrayList<Value> elements, Executor executor) {
-        this.executor = executor;
+    final ArrayList<Value> elements;
+    private final HashMap<String, CompiledFunctionValue> members = new HashMap<>();
+    public ListValue(ArrayList<Value> elements) {
         this.elements = elements;
-        members.put("append", new CompiledFunctionValue(executor) {
+        members.put("append", new CompiledFunctionValue() {
             public Value call(List<Value> args) {
                 ListValue.this.elements.addAll(args);
                 return ListValue.this;
             }
         });
-        members.put("length", new CompiledFunctionValue(executor) {
+        members.put("length", new CompiledFunctionValue() {
             public Value call(List<Value> args) {
-                return new NumericValue(elements.size(), executor);
+                return NumericValue.of(elements.size());
             }
         });
-        members.put("remove", new CompiledFunctionValue(executor) {
+        members.put("remove", new CompiledFunctionValue() {
                     @Override
                     public Value call(List<Value> args) {
-                        if (args.size() == 1 && args.get(0) instanceof NumericValue nv) {
+                        if (args.size() == 1 && args.getFirst() instanceof NumericValue nv) {
                             if (nv.number < 0)
                                 throw new InvalidOperationException("Can't remove a negative index from a list");
                             if (nv.number >= elements.size())
@@ -48,20 +45,19 @@ public final class ListValue extends Value {
         if (v instanceof ListValue lv) {
             ArrayList<Value> newElements = new ArrayList<>(elements);
             newElements.addAll(lv.elements);
-            return new ListValue(newElements, executor);
+            return new ListValue(newElements);
         }
         throw new InvalidOperationException("Can't use '+' on lists");
     }
     public Value index(Value v) {
         if (!(v instanceof NumericValue nv))
             throw new InvalidOperationException("Can't index a list by a non-number");
-        if (nv.number < 0)
-            throw new InvalidOperationException("Can't index a list by a negative number");
         if (nv.number >= elements.size())
             throw new InvalidOperationException("Can't index a list by a number larger than "+elements.size());
-        if (nv.number % 1 != 0)
+        int i = (int) nv.number;
+        if (nv.number != i)
             throw new InvalidOperationException("Can't index a list by a non-integer number");
-        return elements.get((int) nv.number);
+        return elements.get(i);
     }
     public Value sub(Value v) {
         throw new InvalidOperationException("Can't use '-' on lists");
@@ -103,7 +99,7 @@ public final class ListValue extends Value {
         throw new InvalidOperationException("Can't use '!' on lists");
     }
     public Value toNumber() {
-        return new NumericValue(elements.size(), executor);
+        return NumericValue.of(elements.size());
     }
     public BooleanValue isTruthy() {
         return BooleanValue.fromBoolean(!elements.isEmpty());
@@ -160,7 +156,7 @@ public final class ListValue extends Value {
         if (v instanceof ListValue lv) {
             ArrayList<Value> newElements = new ArrayList<>(elements);
             newElements.addAll(lv.elements);
-            return new ListValue(newElements, executor);
+            return new ListValue(newElements);
         }
         throw new InvalidOperationException("Can't merge a list with a non-list");
     }
@@ -177,5 +173,15 @@ public final class ListValue extends Value {
             hashcode = 31 * hashcode + e.hashCode();
         }
         return hashcode;
+    }
+    public Value last() {
+        if (elements.isEmpty())
+            throw new InvalidOperationException("Cannot get last element of an empty list");
+        return elements.getLast();
+    }
+    public Value first() {
+        if (elements.isEmpty())
+            throw new InvalidOperationException("Cannot get first element of an empty list");
+        return elements.getFirst();
     }
 }

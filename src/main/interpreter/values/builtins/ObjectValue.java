@@ -1,7 +1,6 @@
 package main.interpreter.values.builtins;
 
 import main.expr.Expression;
-import main.interpreter.Executor;
 import main.interpreter.values.InvalidOperationException;
 
 import java.util.HashMap;
@@ -9,13 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 public final class ObjectValue extends Value {
-    private final HashMap<String, Value> fields; // and methods
-    public final Executor executor;
-    public ObjectValue(InterpretedClassValue cv, Executor executor) {
-        this.executor = executor;
+    private final HashMap<String, Value> fields;
+    public ObjectValue(InterpretedClassValue cv) {
         this.fields = new HashMap<>();
         for (Map.Entry<String, Expression> expr : cv.fields.entrySet()) {
-            Value v = executor.evaluate(expr.getValue());
+            Value v = ExecutorHolder.EXECUTOR.evaluate(expr.getValue());
             if (v instanceof InterpretedFunctionValue iv) {
                 v = iv.toMethod(this);
             }
@@ -64,7 +61,7 @@ public final class ObjectValue extends Value {
     }
     public BooleanValue eq(Value v) {
         if (!fields.containsKey("_eq")) {
-            return BooleanValue.fromBoolean(equals(v));
+            return BooleanValue.fromBoolean(this == v);
         }
         Value val = fields.get("_eq").call(List.of(v));
         if (!(val instanceof BooleanValue bv)) {
@@ -74,7 +71,7 @@ public final class ObjectValue extends Value {
     }
     public BooleanValue neq(Value v) {
         if (!fields.containsKey("_neq")) {
-            return BooleanValue.fromBoolean(!equals(v));
+            return BooleanValue.fromBoolean(this == v);
         }
         Value val = fields.get("_neq").call(List.of(v));
         if (!(val instanceof BooleanValue bv))

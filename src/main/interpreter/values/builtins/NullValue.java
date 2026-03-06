@@ -1,19 +1,12 @@
 package main.interpreter.values.builtins;
 
-import main.interpreter.Executor;
 import main.interpreter.values.InvalidOperationException;
 
 import java.util.List;
 
 public final class NullValue extends Value {
-    public static NullValue INSTANCE = null;
-    public final Executor executor;
-    public static void init(Executor executor) {
-        INSTANCE = new NullValue(executor);
-    }
-    private NullValue(Executor executor) {
-        this.executor = executor;
-    }
+    public static final NullValue INSTANCE = new NullValue();
+    private NullValue() {}
     public Value add(Value v) {
         throw new InvalidOperationException("Cannot add null to a value");
     }
@@ -42,10 +35,10 @@ public final class NullValue extends Value {
         throw new InvalidOperationException("Cannot call a null");
     }
     public BooleanValue eq(Value v) {
-        return BooleanValue.fromBoolean(v instanceof NullValue);
+        return BooleanValue.fromBoolean(v == INSTANCE);
     }
     public BooleanValue neq(Value v) {
-        return BooleanValue.fromBoolean(!(v instanceof NullValue));
+        return BooleanValue.fromBoolean(!(v == INSTANCE));
     }
     public Value neg() {
         throw new InvalidOperationException("Cannot negate a null");
@@ -54,7 +47,7 @@ public final class NullValue extends Value {
         throw new InvalidOperationException("Cannot invert a null");
     }
     public BooleanValue isTruthy() {
-        return BooleanValue.fromBoolean(false);
+        return BooleanValue.FALSE;
     }
     public BooleanValue lt(Value v) {
         throw new InvalidOperationException("Cannot compare a null to a number");
@@ -69,7 +62,7 @@ public final class NullValue extends Value {
         throw new InvalidOperationException("Cannot compare a null to a number");
     }
     public Value toNumber() {
-        return new NumericValue(0, executor);
+        return NumericValue.ZERO;
     }
     public Value setMember(String s, Value v) {
         throw new InvalidOperationException("Cannot set member value "+s+" in a null");
@@ -81,6 +74,6 @@ public final class NullValue extends Value {
         throw new InvalidOperationException("Cannot merge a null with a value");
     }
     public int hashCode() {
-        return 0;
+        return 0x4E554C4C;
     }
 }

@@ -1,46 +1,43 @@
 package main.interpreter.values.builtins;
 
-import main.interpreter.Executor;
 import main.interpreter.values.InvalidOperationException;
 
 import java.util.List;
 
 public final class NumericValue extends Value {
     public final double number;
-    public final Executor executor;
-    public NumericValue(double number, Executor executor) {
+    public static final NumericValue ZERO = new NumericValue(0), ONE = new NumericValue(1);
+    private NumericValue(double number) {
         this.number = number;
-        this.executor = executor;
-    }
-    public Value asNumber() {
-        return this;
     }
     public Value add(Value v) {
-        if (v instanceof StringValue sv) {
-            return new StringValue(number + sv.getValue(), executor);
-        } else if (v instanceof NumericValue nv) {
-            return new NumericValue(number + nv.number, executor);
+        if (v instanceof NumericValue nv) {
+            return NumericValue.of(number + nv.number);
         } else throw new InvalidOperationException("Cannot add " + v.getClass().getSimpleName() + " to a number (number on left side)");
     }
     public Value sub(Value v) {
         if (!(v instanceof NumericValue nv))
             throw new InvalidOperationException("Cannot subtract a" + v.getClass().getSimpleName()+ "from a number");
-        return new NumericValue(number - nv.number, executor);
+        return NumericValue.of(number - nv.number);
     }
     public Value mul(Value v) {
         if (!(v instanceof NumericValue nv))
             throw new InvalidOperationException("Cannot multiply a " + v.getClass().getSimpleName()+ " to a number (number on left side)");
-        return new NumericValue(number * nv.number, executor);
+        return NumericValue.of(number * nv.number);
     }
     public Value div(Value v) {
         if (!(v instanceof NumericValue nv))
             throw new InvalidOperationException("Cannot divide a " + v.getClass().getSimpleName()+ " by a number (number on left side)");
-        return new NumericValue(number / nv.number, executor);
+        if (nv.number == 0)
+            throw new InvalidOperationException("Cannot divide by 0");
+        return NumericValue.of(number / nv.number);
     }
     public Value mod(Value v) {
         if (!(v instanceof NumericValue nv))
             throw new InvalidOperationException("Cannot mod a " + v.getClass().getSimpleName()+ " by a number (number on left side)");
-        return new NumericValue(number % nv.number, executor);
+        if (nv.number == 0)
+            throw new InvalidOperationException("Cannot modulo by 0");
+        return NumericValue.of(number % nv.number);
     }
     public Value getMember(String mem) {
         throw new InvalidOperationException("Cannot get member value "+mem+" from a number");
@@ -55,7 +52,7 @@ public final class NumericValue extends Value {
         return BooleanValue.fromBoolean(v instanceof NumericValue nv && number == nv.number);
     }
     public Value neg() {
-        return new NumericValue(-number, executor);
+        return NumericValue.of(-number);
     }
     public Value inv() {
         throw new InvalidOperationException("Cannot invert a number");
@@ -92,6 +89,9 @@ public final class NumericValue extends Value {
         return this;
     }
     public String toString() {
+        long l = (long) number;
+        if (number == l)
+            return Long.toString(l);
         return Double.toString(this.number);
     }
     public Value setMember(String s, Value v) {
@@ -105,5 +105,10 @@ public final class NumericValue extends Value {
     }
     public int hashCode() {
         return Double.hashCode(number);
+    }
+    public static NumericValue of(double n) {
+        if (n == 0) return ZERO;
+        if (n == 1) return ONE;
+        return new NumericValue(n);
     }
 }

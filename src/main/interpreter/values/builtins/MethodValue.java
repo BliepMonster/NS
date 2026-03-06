@@ -5,9 +5,9 @@ import main.interpreter.values.InvalidOperationException;
 import java.util.List;
 
 public final class MethodValue extends InterpretedFunctionValue {
-    private Value context;
+    private final Value context;
     public MethodValue(InterpretedFunctionValue fn, Value context) {
-        super(fn.parameters, fn.body, fn.executor, fn.closure);
+        super(fn.parameters, fn.body, fn.closure);
         this.context = context;
     }
     @Override
@@ -15,6 +15,6 @@ public final class MethodValue extends InterpretedFunctionValue {
         if (args.size() != parameters.size()) {
             throw new InvalidOperationException("Expected "+parameters.size()+" arguments, got "+args.size());
         }
-        return executor.callFunction(this, args, context);
+        return ExecutorHolder.EXECUTOR.callFunction(this, args, context);
     }
 }

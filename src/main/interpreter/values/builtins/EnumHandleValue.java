@@ -1,6 +1,5 @@
 package main.interpreter.values.builtins;
 
-import main.interpreter.Executor;
 import main.interpreter.values.InvalidOperationException;
 
 import java.util.List;
@@ -8,11 +7,9 @@ import java.util.List;
 public final class EnumHandleValue extends Value {
     public final String name;
     public final EnumValue owner;
-    public final Executor executor;
-    public EnumHandleValue(String name, EnumValue owner, Executor executor) {
+    public EnumHandleValue(String name, EnumValue owner) {
         this.name = name;
         this.owner = owner;
-        this.executor = executor;
     }
     public Value add(Value v) {
         throw new InvalidOperationException("Cannot add an enum handle to a value");

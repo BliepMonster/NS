@@ -1,28 +1,18 @@
 package main.interpreter.values.builtins;
 
-import main.interpreter.Executor;
 import main.interpreter.values.InvalidOperationException;
 
 public final class BooleanValue extends Value {
     public final boolean value;
-    public final Executor executor;
-    private BooleanValue(boolean value, Executor executor) {
+    private BooleanValue(boolean value) {
         this.value = value;
-        this.executor = executor;
     }
-    public static BooleanValue TRUE;
-    public static BooleanValue FALSE;
-    public static void init(Executor executor) {
-        TRUE = new BooleanValue(true, executor);
-        FALSE = new BooleanValue(false, executor);
-    }
+    public static final BooleanValue TRUE = new BooleanValue(true);
+    public static final BooleanValue FALSE = new BooleanValue(false);
     public static BooleanValue fromBoolean(boolean value) {
         return value ? TRUE : FALSE;
     }
     public Value add(Value v) {
-        if (v instanceof StringValue sv) {
-            return new StringValue(value + sv.getValue(), executor);
-        }
         throw new InvalidOperationException("Cannot add boolean values");
     }
     public Value sub(Value v) {
@@ -46,25 +36,22 @@ public final class BooleanValue extends Value {
     public Value call(java.util.List<Value> args) {
         throw new InvalidOperationException("Cannot call a boolean");
     }
-    public Value asNumber() {
-        return new NumericValue(value ? 1 : 0, executor);
-    }
     public BooleanValue eq(Value v) {
-        return new BooleanValue(v instanceof BooleanValue bv && value == bv.value, executor);
+        return fromBoolean(v instanceof BooleanValue bv && value == bv.value);
     }
     public Value neg() {
         throw new InvalidOperationException("Cannot negate a boolean");
     }
     public Value inv() {
-        return new BooleanValue(!value, executor);
+        return fromBoolean(!value);
     }
     public BooleanValue isTruthy() {
         return this;
     }
     public BooleanValue neq(Value v) {
         if (!(v instanceof BooleanValue bv))
-            return new BooleanValue(true, executor);
-        return new BooleanValue(value != bv.value, executor);
+            return fromBoolean(true);
+        return fromBoolean(value != bv.value);
     }
     public BooleanValue lt(Value v) {
         throw new InvalidOperationException("Cannot compare a boolean to a number");
@@ -79,7 +66,7 @@ public final class BooleanValue extends Value {
         throw new InvalidOperationException("Cannot compare a boolean to a number");
     }
     public Value toNumber() {
-        return new NumericValue(value ? 1 : 0, executor);
+        return value ? NumericValue.ONE : NumericValue.ZERO;
     }
     public String toString() {
         return value ? "true" : "false";
@@ -94,6 +81,6 @@ public final class BooleanValue extends Value {
         throw new InvalidOperationException("Cannot merge a boolean with a value");
     }
     public int hashCode() {
-        return Boolean.hashCode(value);
+        return value ? 1231 : 1237;
     }
 }
