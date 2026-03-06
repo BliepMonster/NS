@@ -29,7 +29,6 @@ public enum TokenType {
     MINUS,
     STAR,
     SLASH,
-    EXP, // exponentiation
     MOD,
 
     EQ, // assignment
@@ -53,7 +52,6 @@ public enum TokenType {
     MINUS_EQ,
     STAR_EQ,
     SLASH_EQ,
-    EXP_EQ,
     MOD_EQ,
 
     ARROW,

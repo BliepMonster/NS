@@ -39,7 +39,7 @@ public class Scanner {
         switch (c) {
             case '+': return makeToken(match('=') ? PLUS_EQ : PLUS);
             case '-': return makeToken(match('=') ? MINUS_EQ : match('>') ? ARROW : MINUS);
-            case '*': return makeToken(match('*') ? match('=') ? EXP_EQ : EXP : match('=') ? STAR_EQ : STAR);
+            case '*': return makeToken(match('=') ? STAR_EQ : STAR);
             case '|': return makeToken(PIPE);
             case '/': {
                 if (match('/')) {

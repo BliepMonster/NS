@@ -7,6 +7,8 @@ import main.interpreter.values.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static main.TokenType.*;
+
 // native functions may use other strategies, like $ignoreWhileResult(loop) which is made for optimization
 enum LoopEvaluationStrategy {
     NO_ELEMENTS,
@@ -42,7 +44,17 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
     }
     public Value visitAssignmentExpression(AssignmentExpression expr) {
         Expression left = expr.target;
-        Value val = expr.value.accept(this);
+        Value val;
+        if (expr.token.type() == EQ)
+            val = expr.value.accept(this);
+        else switch(expr.token.type()) {
+            case PLUS_EQ -> val = left.accept(this).add(expr.value.accept(this));
+            case MINUS_EQ -> val = left.accept(this).sub(expr.value.accept(this));
+            case STAR_EQ -> val = left.accept(this).mul(expr.value.accept(this));
+            case SLASH_EQ -> val = left.accept(this).div(expr.value.accept(this));
+            case MOD_EQ -> val = left.accept(this).mod(expr.value.accept(this));
+            default -> throw new RuntimeException("Invalid assignment operator: " + expr.token);
+        }
         switch (left) {
             case VariableLookupExpression vle: {
                 scope.assign(vle.name, val);

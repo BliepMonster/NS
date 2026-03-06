@@ -48,7 +48,7 @@ public class Parser {
     }
     Expression assignment() {
         Expression expr = fallback();
-        if (match(EQ)) {
+        if (match(EQ, PLUS_EQ, STAR_EQ, MINUS_EQ, SLASH_EQ, MOD_EQ)) {
             Token t = previous();
             if (!isAssignable(expr))
                 throw new ParserException(peek().line(), "Invalid assignment target.");
