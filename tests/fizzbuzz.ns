@@ -1,0 +1,1 @@
+((i, counter) -> $ignoreWhileResult((((i += 1) <= counter)::((x) -> #(if = true)+#((x % 3 == 0) ? $print("fizz"+((if = false) ? "" : ""))  : null)+#((x % 5 == 0) ? $print("buzz"+((if = false) ? "" : "")) : null)+#((if) ? $print(x) : null) +#($println("")))(i))))(0, 100);

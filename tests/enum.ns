@@ -1,13 +1,12 @@
-ErrorType = enum {
-    NO_ERROR,
-    FILE_NOT_FOUND,
-    READ_FAILED,
-    UNKNOWN
-};
-err = ErrorType.UNKNOWN;
-match (err) {
-    ErrorType.NO_ERROR => $print("No error"),
-    ErrorType.FILE_NOT_FOUND => $print("File not found"),
-    ErrorType.READ_FAILED => $print("Read failed"),
-    _ => $print("Unknown error")
+match ((
+    ErrorType = enum {
+        NO_ERROR,
+        FILE_NOT_FOUND,
+        READ_FAILED,
+        UNKNOWN
+    }).FILE_NOT_FOUND) {
+        ErrorType.NO_ERROR => $print("No error"),
+        ErrorType.FILE_NOT_FOUND => $print("File not found"),
+        ErrorType.READ_FAILED => $print("Read failed"),
+        _ => $print("Unknown error")
 };
