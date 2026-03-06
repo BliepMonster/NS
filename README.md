@@ -115,6 +115,7 @@ e = 1;
 b = match (e) {
     0 => "zero",
     1 => "one",
+    (a = 2) => "side effect in condition, two",
     _ => "a lot"
 };
 $ print(b); // "one"
