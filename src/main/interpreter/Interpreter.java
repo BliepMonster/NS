@@ -2,7 +2,6 @@ package main.interpreter;
 
 import main.*;
 import main.expr.*;
-import main.interpreter.values.*;
 import main.interpreter.values.builtins.*;
 import main.interpreter.values.builtins.BooleanValue;
 import main.interpreter.values.builtins.NullValue;
@@ -231,57 +230,44 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
         }
     }
     public Value visitNativeFunctionCallExpression(NativeFunctionCallExpression expr) {
-        if (expr.name.equals("ignoreWhileResult")) {
-            if (expr.args.size() != 1) {
-                throw new RuntimeException("ignoreWhileResult expects 1 argument");
-            }
-            Expression cond = expr.args.getFirst();
-            if (!(cond instanceof LoopExpression loop)) {
-                throw new RuntimeException("ignoreWhileResult expects a loop expression");
-            }
-            return evaluateLoop(loop, LoopEvaluationStrategy.NO_ELEMENTS);
-        } else if (expr.name.equals("last")) {
-            if (expr.args.size() != 1) {
-                throw new RuntimeException("ignoreWhileResult expects 1 argument");
-            }
-            Expression cond = expr.args.getFirst();
-            if (!(cond instanceof LoopExpression loop)) {
-                return cond.accept(this).last();
-            }
-            return evaluateLoop(loop, LoopEvaluationStrategy.LAST_ONLY);
-        } else if (expr.name.equals("first")) {
-            if (expr.args.size() != 1) {
-                throw new RuntimeException("ignoreWhileResult expects 1 argument");
-            }
-            Expression cond = expr.args.getFirst();
-            if (!(cond instanceof LoopExpression loop)) {
-                return cond.accept(this).last();
-            }
-            return evaluateLoop(loop, LoopEvaluationStrategy.FIRST_ONLY);
-        }
         switch (expr.name) {
-            case "print" -> {
-                Value v = expr.args.getFirst().accept(this);
-                System.out.print(v.toString());
+            case "ignoreWhileResult" -> {
+                if (expr.args.size() != 1) {
+                    throw new RuntimeException("ignoreWhileResult expects 1 argument");
+                }
+                Expression cond = expr.args.getFirst();
+                if (!(cond instanceof LoopExpression loop)) {
+                    throw new RuntimeException("ignoreWhileResult expects a loop expression");
+                }
+                return evaluateLoop(loop, LoopEvaluationStrategy.NO_ELEMENTS);
             }
-            case "input" -> {
-                System.out.println();
-                System.out.print("> ");
-                String input = System.console().readLine();
-                return new StringValue(input);
+            case "last" -> {
+                if (expr.args.size() != 1) {
+                    throw new RuntimeException("ignoreWhileResult expects 1 argument");
+                }
+                Expression cond = expr.args.getFirst();
+                if (!(cond instanceof LoopExpression loop)) {
+                    return cond.accept(this).last();
+                }
+                return evaluateLoop(loop, LoopEvaluationStrategy.LAST_ONLY);
             }
-            case "println" -> {
-                Value v = expr.args.getFirst().accept(this);
-                System.out.println(v.toString());
-            }
-            case "str" -> {
-                return new StringValue(expr.args.getFirst().accept(this).toString());
-            }
-            case "clock" -> {
-                return NumericValue.of(System.currentTimeMillis());
+            case "first" -> {
+                if (expr.args.size() != 1) {
+                    throw new RuntimeException("ignoreWhileResult expects 1 argument");
+                }
+                Expression cond = expr.args.getFirst();
+                if (!(cond instanceof LoopExpression loop)) {
+                    return cond.accept(this).last();
+                }
+                return evaluateLoop(loop, LoopEvaluationStrategy.FIRST_ONLY);
             }
         }
-        return NullValue.INSTANCE;
+        List<Value> args = expr.args.stream().map(arg -> arg.accept(this)).toList();
+        CompiledFunctionValue f = FunctionRegistry.functions.get(expr.name);
+        if (f == null) {
+            throw new RuntimeException("Unknown function: " + expr.name);
+        }
+        return f.call(args);
     }
     public Value visitListExpression(ListExpression expr) {
         ArrayList<Value> values = new ArrayList<>();
