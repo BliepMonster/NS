@@ -83,6 +83,28 @@ List of function names:
 * _str = string conversion (for printing)
 * _merge = function merging
 
+### Enums
+
+You can create an enum using the enum keyword.
+```
+ErrorType = enum {
+    NO_ERROR,
+    FILE_NOT_FOUND,
+    READ_FAILED,
+    UNKNOWN
+};
+err = ErrorType.NO_ERROR;
+(err == ErrorType.FILE_NOT_FOUND) ? $ print("file not found") : (
+    (err == ErrorType.READ_FAILED) ? $ print("read failed") : (
+         (err == ErrorType.NO_ERROR) ? $ print("no error") : (
+            $ print("unknown error")
+         )
+    )
+); // prints "no error"
+```
+
+If you have 2 enums with the same branch (eg. a ReadError.FILE_NOT_FOUND and WriteError.FILE_NOT_FOUND), these branches are not equal.
+
 ## Example program
 ```
 $ print(((tmp1, tmp2, tmp3, c) -> ((until) -> (c <= until)::tmp3 + 0*(c = c + 1 + 0*(tmp1 = tmp2) + 0*(tmp2 = tmp3) + 0*(tmp3 = tmp1+tmp2))))(0, 0, 1, 1)(200));
@@ -92,6 +114,5 @@ This prints the first 200 numbers in the fibonacci sequence.
 ## Future plans
 * Range values (0..10)
 * Pattern matching
-* Enums
 * Dictionaries and sets
 * Expand stdlib

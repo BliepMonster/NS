@@ -1,0 +1,14 @@
+ErrorType = enum {
+    NO_ERROR,
+    FILE_NOT_FOUND,
+    READ_FAILED,
+    UNKNOWN
+};
+err = ErrorType.FILE_NOT_FOUND;
+(err == ErrorType.FILE_NOT_FOUND) ? $ print("file not found") : (
+    (err == ErrorType.READ_FAILED) ? $ print("read failed") : (
+         (err == ErrorType.NO_ERROR) ? $ print("no error") : (
+            $ print("unknown error")
+         )
+    )
+); // prints "no error"
