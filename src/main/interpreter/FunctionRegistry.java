@@ -2,7 +2,9 @@ package main.interpreter;
 
 import main.interpreter.values.InvalidOperationException;
 import main.interpreter.values.builtins.*;
+import main.interpreter.values.natives.FileReaderValue;
 
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 
@@ -57,6 +59,15 @@ public class FunctionRegistry {
                     throw new InvalidOperationException("clock() takes no arguments");
                 }
                 return NumericValue.of(System.currentTimeMillis());
+            }
+        });
+        functions.put("openFileReadingHandle", new CompiledFunctionValue() {
+            @Override
+            public Value call(List<Value> args) {
+                if (args.size() != 1) {
+                    throw new InvalidOperationException("openFile() takes exactly one argument");
+                }
+                return new FileReaderValue(Paths.get(args.getFirst().toString()));
             }
         });
     }

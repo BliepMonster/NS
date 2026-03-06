@@ -257,7 +257,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
                 }
                 Expression cond = expr.args.getFirst();
                 if (!(cond instanceof LoopExpression loop)) {
-                    return cond.accept(this).last();
+                    return cond.accept(this).first();
                 }
                 return evaluateLoop(loop, LoopEvaluationStrategy.FIRST_ONLY);
             }

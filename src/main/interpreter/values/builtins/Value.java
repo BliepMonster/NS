@@ -34,7 +34,9 @@ public sealed abstract class Value permits
         // maps
         DictionaryValue,
         // hash sets
-        SetValue
+        SetValue,
+        // builtins eg files
+        BuiltinObjectValue
 {
     public abstract Value add(Value other);
     public abstract Value sub(Value other);
