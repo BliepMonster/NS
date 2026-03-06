@@ -57,7 +57,7 @@ public class Scanner {
                 } else return makeToken(match('=') ? SLASH_EQ : SLASH);
             }
             case '%': return makeToken(match('=') ? MOD_EQ : MOD);
-            case '=': return makeToken(match('=') ? EQEQ : EQ);
+            case '=': return makeToken(match('=') ? EQEQ : match('>') ? ARROW2 : EQ);
             case '<': return makeToken(match('=') ? LTEQ : LT);
             case '>': return makeToken(match('=') ? GTEQ : GT);
             case ':': return makeToken(match(':') ? DOUBLE_COLON : COLON);
@@ -110,6 +110,8 @@ public class Scanner {
             case "and" -> AND;
             case "this" -> THIS;
             case "enum" -> ENUM;
+            case "_" -> UNDERSCORE;
+            case "match" -> MATCH;
             default -> IDENTIFIER;
         };
     }

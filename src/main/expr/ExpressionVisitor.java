@@ -21,4 +21,5 @@ public interface ExpressionVisitor<R> {
     R visitTernaryExpression(TernaryExpression expr);
     R visitCatchExpression(CatchExpression expr);
     R visitEnumDeclarationExpression(EnumDeclarationExpression expr);
+    R visitMatchExpression(MatchExpression expr);
 }

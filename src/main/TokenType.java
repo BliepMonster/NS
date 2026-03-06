@@ -6,6 +6,9 @@ public enum TokenType {
     THIS,
     CATCH,
     ENUM,
+    MATCH,
+
+    UNDERSCORE,
 
     IDENTIFIER,
 
@@ -56,6 +59,7 @@ public enum TokenType {
     MOD_EQ,
 
     ARROW,
+    ARROW2,
 
     OR,
     AND,

@@ -248,6 +248,9 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
             case "str" -> {
                 return new StringValue(expr.args.getFirst().accept(this).toString(), this);
             }
+            case "clock" -> {
+                return new NumericValue(System.currentTimeMillis(), this);
+            }
         }
         return NullValue.INSTANCE;
     }
@@ -290,5 +293,16 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
     }
     public Value visitEnumDeclarationExpression(EnumDeclarationExpression expr) {
         return new EnumValue(expr.members, this);
+    }
+    public Value visitMatchExpression(MatchExpression expr) {
+        Value v = expr.expr.accept(this);
+        for (MatchExpression.Case c : expr.cases) {
+            Value w = c.pattern().accept(this);
+            BooleanValue eq = v.eq(w);
+            if (eq.value)
+                return c.value().accept(this);
+        } if (expr.other == null)
+            throw new RuntimeException("Match expression did not match any case");
+        return expr.other.accept(this);
     }
 }

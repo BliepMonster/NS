@@ -37,6 +37,8 @@ public class Parser {
         return tokens.get(index++);
     }
     void consume(TokenType t, String error) {
+        if (isAtEnd())
+            throw new ParserException(peek().line(), error);
         Token tt = advance();
         if (tt.type() == t)
             return;
@@ -71,6 +73,8 @@ public class Parser {
         return false;
     }
     Token peek() {
+        if (tokens.size() <= index)
+            return new Token("", EOF, -1);
         return tokens.get(index);
     }
     Expression fallback() {
@@ -191,6 +195,7 @@ public class Parser {
             case LBRACKET -> list();
             case DOLLAR -> nativeCall();
             case ENUM -> enumDeclaration();
+            case MATCH -> match();
             default -> throw new ParserException(t.line(), "Expect expression.");
         };
     }
@@ -341,5 +346,28 @@ public class Parser {
         }
         consume(RBRACE, "Expect '}' after enum body.");
         return new EnumDeclarationExpression(mems);
+    }
+    Expression match() {
+        consume(LPAREN, "Expect '(' after match.");
+        Expression match = expression();
+        consume(RPAREN, "Expect ')' after match.");
+        consume(LBRACE, "Expect '{' for match body.");
+        ArrayList<MatchExpression.Case> cases = new ArrayList<>();
+        Expression defaultCase = null;
+        if (!check(RBRACE)) {
+            do {
+                if (match(UNDERSCORE)) {
+                    consume(ARROW2, "Expect '=>' after default case.");
+                    defaultCase = expression();
+                    break;
+                }
+                Expression pattern = expression();
+                consume(ARROW2, "Expect '=>' after pattern.");
+                Expression value = expression();
+                cases.add(new MatchExpression.Case(pattern, value));
+            } while (match(COMMA));
+        }
+        consume(RBRACE, "Expect '}' after match body or default case.");
+        return new MatchExpression(match, cases, defaultCase);
     }
 }

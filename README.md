@@ -105,6 +105,23 @@ err = ErrorType.NO_ERROR;
 
 If you have 2 enums with the same branch (eg. a ReadError.FILE_NOT_FOUND and WriteError.FILE_NOT_FOUND), these branches are not equal.
 
+### Match
+
+A match expression will compare a certain expression to other expressions. If these are equal, it exits the expression and returns the associated value.
+
+You can also produce a fallback using the '_' token.
+```
+e = 1;
+b = match (e) {
+    0 => "zero",
+    1 => "one",
+    _ => "a lot"
+};
+$ print(b); // "one"
+```
+
+This does not support advanced pattern matching, only simple equality.
+
 ## Example program
 ```
 $ print(((tmp1, tmp2, tmp3, c) -> ((until) -> (c <= until)::tmp3 + 0*(c = c + 1 + 0*(tmp1 = tmp2) + 0*(tmp2 = tmp3) + 0*(tmp3 = tmp1+tmp2))))(0, 0, 1, 1)(200));
@@ -113,6 +130,5 @@ $ print(((tmp1, tmp2, tmp3, c) -> ((until) -> (c <= until)::tmp3 + 0*(c = c + 1 
 This prints the first 200 numbers in the fibonacci sequence.
 ## Future plans
 * Range values (0..10)
-* Pattern matching
 * Dictionaries and sets
 * Expand stdlib
