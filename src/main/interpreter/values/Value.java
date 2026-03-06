@@ -28,7 +28,9 @@ public sealed abstract class Value permits
         // enum handles
         EnumHandleValue,
         // ranges
-        RangeValue
+        RangeValue,
+        // maps
+        DictionaryValue
 {
     public abstract Value add(Value other);
     public abstract Value sub(Value other);
@@ -54,5 +56,8 @@ public sealed abstract class Value permits
     public abstract Value merge(Value v);
     public Value contains(Value v) {
         throw new InvalidOperationException("Cannot use 'in' operator on this value");
+    }
+    public boolean equals(Object other) {
+        return other instanceof Value v && eq(v).value;
     }
 }
