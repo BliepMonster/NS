@@ -27,6 +27,7 @@ public enum TokenType {
 
     COMMA, // function args, vectors, lists
     DOT, // class members
+    DOUBLE_DOT, // ranges
     SEMICOLON, // separating expressions
 
     PLUS,

@@ -72,7 +72,7 @@ public class Scanner {
             case '[': return makeToken(LBRACKET);
             case ']': return makeToken(RBRACKET);
             case '.': if (isNumber(peek())) return number('.');
-            else return makeToken(DOT);
+                        else return makeToken(match('.') ? DOUBLE_DOT : DOT);
             case ',': return makeToken(COMMA);
             case ';': return makeToken(SEMICOLON);
             case '"', '\'': return string(c);
@@ -130,17 +130,20 @@ public class Scanner {
         return c >= '0' && c <= '9';
     }
     private Token number(char c) {
-        boolean dot = false;
-        if (c == '.')
-            dot = true;
-        while (isNumber(peek()) || peek() == '.') {
-            if (advance() == '.') {
-                if (dot)
-                    throw new ScannerException("Invalid number");
-                dot = true;
+        if (c == '.') {
+            while (isNumber(peek())) {
+                advance();
             }
+            return makeToken(NUMBER);
         }
-        return makeToken(NUMBER); // makeToken handles the rest
+        while (isNumber(peek()))
+            advance();
+        if (peek() == '.' && isNumber(peekNext())) {
+            do {
+                advance();
+            } while (isNumber(peek()));
+        }
+        return makeToken(NUMBER);
     }
     private boolean match(char c) {
         if (peek() == c) {
@@ -177,5 +180,10 @@ public class Scanner {
                 }
             }
         }
+    }
+    private char peekNext() {
+        if (pointer + 1 >= text.length())
+            return '\0';
+        return text.charAt(pointer + 1);
     }
 }
