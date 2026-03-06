@@ -147,7 +147,15 @@ public class Parser {
         if (match(BANG, QUESTION, HASH, MINUS)) {
             return new UnaryExpression(previous(), unary());
         }
-        return call();
+        return range();
+    }
+    Expression range() {
+        Expression left = call();
+        if (match(DOUBLE_DOT)) {
+            Expression right = call();
+            return new RangeExpression(left, right);
+        }
+        return left;
     }
     private Expression finishCall(Expression callee) {
         ArrayList<Expression> arguments = new ArrayList<>();

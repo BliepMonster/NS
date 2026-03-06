@@ -306,4 +306,16 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
             throw new RuntimeException("Match expression did not match any case");
         return expr.other.accept(this);
     }
+    public Value visitRangeExpression(RangeExpression expr) {
+        Value v1 = expr.start.accept(this);
+        Value v2 = expr.end.accept(this);
+        if (!(v1 instanceof NumericValue n1))
+            throw new RuntimeException("Range start must be numeric");
+        if (!(v2 instanceof NumericValue n2))
+            throw new RuntimeException("Range end must be numeric");
+        if (n1.number > n2.number) {
+            return new RangeValue(n1.number, n2.number, RangeValue.DESCENDING, this);
+        }
+        return new RangeValue(n1.number, n2.number, RangeValue.ASCENDING, this);
+    }
 }

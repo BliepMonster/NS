@@ -26,7 +26,9 @@ public sealed abstract class Value permits
         // enums
         EnumValue,
         // enum handles
-        EnumHandleValue
+        EnumHandleValue,
+        // ranges
+        RangeValue
 {
     public abstract Value add(Value other);
     public abstract Value sub(Value other);
