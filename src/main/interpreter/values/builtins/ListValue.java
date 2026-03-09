@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 
 public final class ListValue extends Value {
-    final ArrayList<Value> elements;
+    final List<Value> elements;
     private final HashMap<String, CompiledFunctionValue> members = new HashMap<>();
-    public ListValue(ArrayList<Value> elements) {
+    public ListValue(List<Value> elements) {
         this.elements = elements;
         members.put("append", new CompiledFunctionValue() {
             public Value call(List<Value> args) {
@@ -51,7 +51,10 @@ public final class ListValue extends Value {
     }
     public Value index(Value v) {
         if (!(v instanceof NumericValue nv))
-            throw new InvalidOperationException("Can't index a list by a non-number");
+            if (v instanceof RangeValue rv)
+                return indexRange(rv);
+            else
+                throw new InvalidOperationException("Can't index a list by a non-number");
         if (nv.number >= elements.size())
             throw new InvalidOperationException("Can't index a list by a number larger than "+elements.size());
         int i = (int) nv.number;
@@ -183,5 +186,11 @@ public final class ListValue extends Value {
         if (elements.isEmpty())
             throw new InvalidOperationException("Cannot get first element of an empty list");
         return elements.getFirst();
+    }
+    Value indexRange(RangeValue rv) {
+        if (rv.order == RangeValue.ASCENDING) {
+            return new ListValue(elements.subList((int) rv.l, (int) rv.r+1));
+        }
+        return new ListValue(elements.subList((int) rv.r, (int) rv.l+1));
     }
 }

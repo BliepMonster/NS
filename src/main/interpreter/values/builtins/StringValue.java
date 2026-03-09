@@ -43,7 +43,10 @@ public final class StringValue extends Value {
     }
     public Value index(Value v) {
         if (!(v instanceof NumericValue nv))
-            throw new InvalidOperationException("Cannot index a string by a non-number");
+            if (v instanceof RangeValue rv)
+                return indexRange(rv);
+            else
+                throw new InvalidOperationException("Cannot index a string by a non-number");
         if (nv.number < 0)
             throw new InvalidOperationException("Cannot index a string by a negative number");
         int i = (int) nv.number;
@@ -101,5 +104,11 @@ public final class StringValue extends Value {
     }
     public int hashCode() {
         return value.hashCode();
+    }
+    Value indexRange(RangeValue rv) {
+        if (rv.order == RangeValue.ASCENDING) {
+            return new StringValue(value.substring((int) rv.l, (int) rv.r+1));
+        }
+        return new StringValue(value.substring((int) rv.r, (int) rv.l+1));
     }
 }
