@@ -4,6 +4,7 @@ import main.interpreter.values.InvalidOperationException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 public final class ListValue extends Value {
@@ -192,5 +193,10 @@ public final class ListValue extends Value {
             return new ListValue(elements.subList((int) rv.l, (int) rv.r+1));
         }
         return new ListValue(elements.subList((int) rv.r, (int) rv.l+1));
+    }
+
+    @Override
+    public Iterator<Value> iterator() {
+        return this.elements.iterator();
     }
 }

@@ -3,6 +3,9 @@ package main.interpreter;
 import main.interpreter.values.InvalidOperationException;
 import main.interpreter.values.builtins.*;
 import main.interpreter.values.natives.FileReaderValue;
+import main.interpreter.values.natives.IteratorValue;
+import main.interpreter.values.natives.RangeIterator;
+import main.interpreter.values.natives.StepRange;
 
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -68,6 +71,29 @@ public class FunctionRegistry {
                     throw new InvalidOperationException("openFile() takes exactly one argument");
                 }
                 return new FileReaderValue(Paths.get(args.getFirst().toString()));
+            }
+        });
+        // allow iterating over ranges
+        functions.put("step", new CompiledFunctionValue() {
+            @Override
+            public Value call(List<Value> args) {
+                if (args.size() != 2)
+                    throw new InvalidOperationException("step() takes 2 arguments: a range and a number");
+                if (!(args.getFirst() instanceof RangeValue range))
+                    throw new InvalidOperationException("step() takes 2 arguments: a range and a number");
+                if (!(args.getLast() instanceof NumericValue iter))
+                    throw new InvalidOperationException("step() takes 2 arguments: a range and a number");
+                if (iter.number <= 0)
+                    throw new InvalidOperationException("step must be positive");
+                return new RangeIterator((new StepRange(range, iter.number)));
+            }
+        });
+        functions.put("iter", new CompiledFunctionValue() {
+            @Override
+            public Value call(List<Value> args) {
+                if (args.size() != 1)
+                    throw new InvalidOperationException("iter() takes one argument");
+                return new IteratorValue(args.getFirst().iterator());
             }
         });
     }

@@ -83,6 +83,9 @@ List of function names:
 * _str = string conversion (for printing)
 * _merge = function merging
 * _contains = a in b: b._contains(a)
+* _iter = iterator
+* _iter_next = custom iterator: advance and give previous value
+* _iter_hasnext = custom iterator: is it finished
 
 ### Enums
 
@@ -159,12 +162,28 @@ set.add(1);
 $ println(#set) // still 4
 ```
 
+### Iterators
+
+You can iterate over collections using a for loop.
+
+```
+list = [1, 2, 3, 4, 5, 6];
+square = (l) -> x * x for x in l;
+$ print(square(list));
+```
+
+You can also iterate over ranges by using the $step() function, which produces an iterable object.
+```
+range = 1..10;
+iterable = $step(range, 1);
+$ print(x for x in iterable);
+```
+
+You can also define custom iterators and iterables in objects using operator overloading.
+
 ## Example program
 ```
 $ print(((tmp1, tmp2, tmp3, c) -> ((until) -> (c <= until)::tmp3 + 0*(c += 1) + (0*(tmp1 = tmp2) + 0*(tmp2 = tmp3) + 0*(tmp3 = tmp1+tmp2))))(0, 0, 1, 1)(200));
 ```
 
 This prints the first 200 numbers in the fibonacci sequence.
-## Future plans
-* Iterators for ranges, lists, and sets
-* Expand stdlib

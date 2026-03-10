@@ -6,7 +6,6 @@ import main.interpreter.values.builtins.*;
 import main.interpreter.values.builtins.BooleanValue;
 import main.interpreter.values.builtins.NullValue;
 import main.interpreter.values.builtins.NumericValue;
-import main.interpreter.values.builtins.StringValue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -139,13 +138,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
         return scope.getThis();
     }
     public Value visitLiteralExpression(LiteralExpression expr) {
-        return switch (expr.value) {
-            case String s -> new StringValue(s);
-            case Boolean b -> BooleanValue.fromBoolean(b);
-            case Double d -> NumericValue.of(d);
-            case null -> NullValue.INSTANCE;
-            default -> throw new RuntimeException("Invalid literal: " + expr.value);
-        };
+        return expr.value;
     }
     public Value visitVectorExpression(VectorExpression expr) {
         NumericValue[] values = new NumericValue[expr.elements.size()];
@@ -349,5 +342,16 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
             set.add(e.accept(this));
         }
         return new SetValue(set);
+    }
+    public Value visitForExpression(ForExpression expr) {
+        Value list = expr.list.accept(this);
+        ArrayList<Value> values = new ArrayList<>();
+        scope = new Scope(scope);
+        for (Value v : list) {
+            scope.assignLocal(expr.variable.text(), v);
+            values.add(expr.action.accept(this));
+        }
+        scope = scope.parent;
+        return new ListValue(values);
     }
 }

@@ -3,9 +3,7 @@ package main.interpreter.values.builtins;
 import main.expr.Expression;
 import main.interpreter.values.InvalidOperationException;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class ObjectValue extends Value {
     private final HashMap<String, Value> fields;
@@ -164,5 +162,24 @@ public final class ObjectValue extends Value {
     }
     public int hashCode() {
         return fields.hashCode();
+    }
+    public boolean hasNext() {
+        if (!fields.containsKey("_iter_hasnext"))
+            throw new InvalidOperationException("Object does not override iterator function _iter_hasnext");
+        var result = fields.get("_iter_hasnext").call(new ArrayList<>());
+        if (!(result instanceof BooleanValue bv))
+            throw new InvalidOperationException("Iterator function hasnext must return boolean");
+        return bv.value;
+    }
+    public Value next() {
+        if (!fields.containsKey("_iter_next"))
+            throw new InvalidOperationException("Object does not override iterator function _iter_next");
+        return fields.get("_iter_next").call(new ArrayList<>());
+    }
+    public Iterator<Value> iterator() {
+        if (!fields.containsKey("_iter"))
+            throw new InvalidOperationException("Object does not override iterable function _iter");
+        var iter = fields.get("_iter").call(new ArrayList<>());
+        return iter;
     }
 }

@@ -113,6 +113,7 @@ public class Scanner {
             case "_" -> UNDERSCORE;
             case "match" -> MATCH;
             case "in" -> IN;
+            case "for" -> FOR;
             default -> IDENTIFIER;
         };
     }

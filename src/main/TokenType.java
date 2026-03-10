@@ -7,6 +7,7 @@ public enum TokenType {
     CATCH,
     ENUM,
     MATCH,
+    FOR,
 
     UNDERSCORE,
 

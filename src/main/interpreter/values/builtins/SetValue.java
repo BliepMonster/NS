@@ -4,6 +4,7 @@ import main.interpreter.values.InvalidOperationException;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 public final class SetValue extends Value {
@@ -133,5 +134,10 @@ public final class SetValue extends Value {
     }
     public int hashCode() {
         return set.hashCode();
+    }
+
+    @Override
+    public Iterator<Value> iterator() {
+        return this.set.iterator();
     }
 }

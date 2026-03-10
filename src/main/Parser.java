@@ -1,6 +1,7 @@
 package main;
 
 import main.expr.*;
+import main.interpreter.values.builtins.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -87,12 +88,22 @@ public class Parser {
         return expr;
     }
     Expression ternary() {
-        Expression expr = or();
+        Expression expr = forLoop();
         if (match(QUESTION)) {
             Expression trueExpr = expression();
             consume(COLON, "Expect ':' after '?'");
             Expression falseExpr = expression();
             return new TernaryExpression(expr, trueExpr, falseExpr);
+        }
+        return expr;
+    }
+    Expression forLoop() {
+        Expression expr = or();
+        if (match(FOR)) {
+            Token t = advance();
+            consume(IN, "Expect 'in' after 'for'.");
+            Expression loop = expression();
+            return new ForExpression(expr, loop, t);
         }
         return expr;
     }
@@ -197,11 +208,11 @@ public class Parser {
         Token t = advance();
         return switch (t.type()) {
             case THIS -> new ThisExpression();
-            case TRUE -> new LiteralExpression(true);
-            case FALSE -> new LiteralExpression(false);
-            case NULL -> new LiteralExpression(null);
-            case NUMBER -> new LiteralExpression(Double.parseDouble(t.text()));
-            case STRING -> new LiteralExpression(t.text().substring(1, t.text().length() - 1));
+            case TRUE -> new LiteralExpression(BooleanValue.TRUE);
+            case FALSE -> new LiteralExpression(BooleanValue.FALSE);
+            case NULL -> new LiteralExpression(NullValue.INSTANCE);
+            case NUMBER -> new LiteralExpression(NumericValue.of(Double.parseDouble(t.text())));
+            case STRING -> new LiteralExpression(new StringValue(t.text().substring(1, t.text().length() - 1)));
             case IDENTIFIER -> new VariableLookupExpression(t.text());
             case LPAREN -> paren();
             case CLASS -> classDeclaration();

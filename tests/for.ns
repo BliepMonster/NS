@@ -1,0 +1,25 @@
+range = 1..100;
+square = (l) -> x * x for x in l;
+$ println(square($step(range, 1)));
+
+List = class() {
+    .list = [1, 2, 3, 4, 5],
+    ._iter = () -> $iter(this.list)
+};
+Iterator = class() {
+    .index = -1,
+    .list = [],
+    ._iter_hasnext = () -> this.index < #this.list-1,
+    ._iter_next = () -> this.list[this.index += 1]
+};
+iter = (list) -> {
+    iter = Iterator();
+    iter.list = list;
+    return iter;
+};
+Custom = class() {
+    .list = [1, 2, 3, 4, 5],
+    ._iter = () -> iter(this.list)
+};
+o = Custom();
+$ print(x for x in o);
