@@ -189,4 +189,7 @@ public final class VectorValue extends Value {
         }
         return hashcode;
     }
+    public Value length() {
+        return NumericValue.of(elements.length);
+    }
 }

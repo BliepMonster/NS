@@ -96,5 +96,12 @@ public class FunctionRegistry {
                 return new IteratorValue(args.getFirst().iterator());
             }
         });
+        functions.put("len", new CompiledFunctionValue() {
+            public Value call(List<Value> args) {
+                if (args.size() != 1)
+                    throw new InvalidOperationException("len() takes exactly one argument");
+                return args.getFirst().length();
+            }
+        });
     }
 }

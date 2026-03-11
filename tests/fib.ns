@@ -23,6 +23,7 @@ $ println(
 
 // ITERATIVE:
 // we use a literal instead of an argument here, as the constant folder will optimize it away
+// same $last() trick as before
 t = $clock();
 $ println(
     ((tmp1, tmp2, tmp3) ->

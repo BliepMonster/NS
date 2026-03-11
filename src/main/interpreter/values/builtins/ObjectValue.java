@@ -185,4 +185,9 @@ public final class ObjectValue extends Value {
         var iter = fields.get("_iter").call(new ArrayList<>());
         return iter;
     }
+    public Value length() {
+        if (!fields.containsKey("_len"))
+            throw new InvalidOperationException("Object does not override length function _len");
+        return fields.get("_len").call(new ArrayList<>());
+    }
 }

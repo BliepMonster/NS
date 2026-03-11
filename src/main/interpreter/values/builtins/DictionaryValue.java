@@ -122,4 +122,7 @@ public final class DictionaryValue extends Value {
     public int hashCode() {
         return map.hashCode();
     }
+    public Value length() {
+        return NumericValue.of(this.map.size());
+    }
 }

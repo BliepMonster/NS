@@ -111,4 +111,7 @@ public final class StringValue extends Value {
         }
         return new StringValue(value.substring((int) rv.r, (int) rv.l+1));
     }
+    public Value length() {
+        return NumericValue.of(value.length());
+    }
 }

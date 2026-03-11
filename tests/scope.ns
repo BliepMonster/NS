@@ -2,4 +2,5 @@ e = {
     x = 2;
     return () -> x;
 };
-$print(e());
+$println(e());
+$print(x catch null); // null: x is undefined here

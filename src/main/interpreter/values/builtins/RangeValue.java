@@ -95,4 +95,7 @@ public final class RangeValue extends Value {
     public int hashCode() {
         return (int) (l+r);
     }
+    public Value length() {
+        return NumericValue.of(Math.abs(r-l));
+    }
 }

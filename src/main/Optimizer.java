@@ -295,6 +295,14 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                     return new LiteralExpression(new StringValue(lit.value.toString()));
                 }
             }
+            case "len" -> {
+                if (arguments.size() != 1)
+                    throw new RuntimeException("len() takes 1 argument");
+                Expression arg = arguments.getFirst();
+                if (arg instanceof LiteralExpression lit) {
+                    return new LiteralExpression(lit.value.length());
+                }
+            }
         }
         return new NativeFunctionCallExpression(expr.name, arguments);
     }

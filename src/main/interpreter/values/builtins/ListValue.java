@@ -199,4 +199,7 @@ public final class ListValue extends Value {
     public Iterator<Value> iterator() {
         return this.elements.iterator();
     }
+    public Value length() {
+        return NumericValue.of(this.elements.size());
+    }
 }

@@ -85,4 +85,7 @@ public sealed abstract class Value implements Iterable<Value>, Iterator<Value>
     public boolean hasNext() {
         throw new InvalidOperationException("This type is not an iterator)");
     }
+    public Value length() {
+        throw new InvalidOperationException("Cannot get length of this value");
+    }
 }

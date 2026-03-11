@@ -140,4 +140,7 @@ public final class SetValue extends Value {
     public Iterator<Value> iterator() {
         return this.set.iterator();
     }
+    public Value length() {
+        return NumericValue.of(this.set.size());
+    }
 }
