@@ -98,4 +98,7 @@ public final class RangeValue extends Value {
     public Value length() {
         return NumericValue.of(Math.abs(r-l));
     }
+    public RangeValue copy() {
+        return new RangeValue(l, r, order);
+    }
 }

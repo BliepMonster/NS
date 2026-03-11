@@ -244,6 +244,8 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
                 if (!(cond instanceof LoopExpression loop)) {
                     if (cond instanceof ForExpression forExpr) {
                         return executeForLoop(forExpr, LoopEvaluationStrategy.NO_ELEMENTS);
+                    } else if (cond instanceof RepeatExpression repExpr) {
+                        return executeRepeat(repExpr, LoopEvaluationStrategy.NO_ELEMENTS);
                     }
                     throw new RuntimeException("ignoreLoopResult expects a loop expression");
                 }
@@ -257,6 +259,8 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
                 if (!(cond instanceof LoopExpression loop)) {
                     if (cond instanceof ForExpression forExpr) {
                         return executeForLoop(forExpr, LoopEvaluationStrategy.LAST_ONLY);
+                    } else if (cond instanceof RepeatExpression repExpr) {
+                        return executeRepeat(repExpr, LoopEvaluationStrategy.LAST_ONLY);
                     }
                     return cond.accept(this).last();
                 }
@@ -270,6 +274,8 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
                 if (!(cond instanceof LoopExpression loop)) {
                     if (cond instanceof ForExpression forExpr) {
                         return executeForLoop(forExpr, LoopEvaluationStrategy.FIRST_ONLY);
+                    } else if (cond instanceof RepeatExpression repExpr) {
+                        return executeRepeat(repExpr, LoopEvaluationStrategy.FIRST_ONLY);
                     }
                     return cond.accept(this).first();
                 }
@@ -371,7 +377,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
         Value list = expr.list.accept(this);
         ArrayList<Value> values = null;
         if (strategy == LoopEvaluationStrategy.ALL_ELEMENTS)
-             values = new ArrayList<>();
+            values = new ArrayList<>();
         scope = new Scope(scope);
         try {
             Value last = NullValue.INSTANCE, first = NullValue.INSTANCE;
@@ -396,5 +402,33 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
         } finally {
             scope = scope.parent;
         }
+    }
+    Value executeRepeat(RepeatExpression expr, LoopEvaluationStrategy strategy) {
+        ArrayList<Value> values = null;
+        if (strategy == LoopEvaluationStrategy.ALL_ELEMENTS)
+            values = new ArrayList<>();
+        scope = new Scope(scope);
+        Value last = NullValue.INSTANCE, first = NullValue.INSTANCE;
+        boolean isFirst = true;
+        for (int i = 0; i < expr.repeat; ++i) {
+            Value v = expr.expr.accept(this);
+            if (isFirst) {
+                isFirst = false;
+                first = v;
+            }
+            last = v;
+            if (strategy == LoopEvaluationStrategy.ALL_ELEMENTS)
+                values.add(v);
+        }
+        scope = scope.parent;
+        return switch (strategy) {
+            case ALL_ELEMENTS -> new ListValue(values);
+            case LAST_ONLY -> last;
+            case FIRST_ONLY -> first;
+            case NO_ELEMENTS -> NullValue.INSTANCE;
+        };
+    }
+    public Value visitRepeatExpression(RepeatExpression expr) {
+        return executeRepeat(expr, LoopEvaluationStrategy.ALL_ELEMENTS);
     }
 }

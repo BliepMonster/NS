@@ -86,6 +86,7 @@ List of function names:
 * _iter = iterator
 * _iter_next = custom iterator: advance and give previous value
 * _iter_hasnext = custom iterator: is it finished
+* _len = length
 
 ### Enums
 
@@ -197,3 +198,4 @@ Before being interpreted, the program is passed to an optimizer. The optimizer o
 * Eliminating dead match/ternary branches
 * Pre-computing some native functions
 * Performing basic type checking on literals or expressions and shortening equality or match expressions
+* Replacing for loops with unused variables by repeated expressions in select cases

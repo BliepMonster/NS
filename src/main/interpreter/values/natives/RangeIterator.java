@@ -17,4 +17,7 @@ public class RangeIterator extends BuiltinObjectValue<StepRange> {
     public Iterator<Value> iterator() {
         return this.obj;
     }
+    public int size() {
+        return obj.length();
+    }
 }

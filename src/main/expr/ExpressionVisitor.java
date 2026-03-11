@@ -26,4 +26,5 @@ public interface ExpressionVisitor<R> {
     R visitDictionaryExpression(DictionaryExpression expr);
     R visitSetExpression(SetExpression expr);
     R visitForExpression(ForExpression expr);
+    R visitRepeatExpression(RepeatExpression expr);
 }

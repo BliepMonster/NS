@@ -26,4 +26,13 @@ public class StepRange implements Iterator<Value> {
         current += step;
         return NumericValue.of(r);
     }
+    public int length() {
+        StepRange copy = new StepRange(range, step);
+        int count = 0;
+        while (copy.hasNext()) {
+            copy.next();
+            count++;
+        }
+        return count;
+    }
 }
