@@ -164,7 +164,7 @@ public final class ListValue extends Value {
         }
         throw new InvalidOperationException("Can't merge a list with a non-list");
     }
-    public Value contains(Value v) {
+    public BooleanValue contains(Value v) {
         for (Value e : elements) {
             if (e.eq(v).value)
                 return BooleanValue.fromBoolean(true);

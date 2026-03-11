@@ -155,10 +155,13 @@ public final class ObjectValue extends Value {
         }
         throw new InvalidOperationException("No merge operator found for object");
     }
-    public Value contains(Value v) {
+    public BooleanValue contains(Value v) {
         if (!fields.containsKey("_contains"))
             throw new InvalidOperationException("Cannot check if an object contains a value");
-        return fields.get("_contains").call(List.of(v));
+        Value val = fields.get("_contains").call(List.of(v));
+        if (!(val instanceof BooleanValue bv))
+            throw new InvalidOperationException("Cannot check if an object contains a value");
+        return bv;
     }
     public int hashCode() {
         return fields.hashCode();

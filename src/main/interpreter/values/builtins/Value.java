@@ -62,7 +62,7 @@ public sealed abstract class Value implements Iterable<Value>, Iterator<Value>
     public abstract Value setMember(String name, Value value);
     public abstract Value setIndex(Value index, Value value);
     public abstract Value merge(Value v);
-    public Value contains(Value v) {
+    public BooleanValue contains(Value v) {
         throw new InvalidOperationException("Cannot use 'in' operator on this value");
     }
     public boolean equals(Object other) {

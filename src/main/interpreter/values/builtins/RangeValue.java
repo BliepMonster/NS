@@ -85,7 +85,7 @@ public final class RangeValue extends Value {
     public Value merge(Value v) {
         throw new InvalidOperationException("Cannot merge a range with a value");
     }
-    public Value contains(Value v) {
+    public BooleanValue contains(Value v) {
         if (!(v instanceof NumericValue nv))
             throw new InvalidOperationException("Cannot check if a range contains a non-numeric value");
         if (order == ASCENDING)

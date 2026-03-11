@@ -116,7 +116,7 @@ public final class DictionaryValue extends Value {
         newMap.putAll(dv.map);
         return new DictionaryValue(newMap);
     }
-    public Value contains(Value v) {
+    public BooleanValue contains(Value v) {
         return BooleanValue.fromBoolean(map.containsKey(v) || map.containsValue(v));
     }
     public int hashCode() {

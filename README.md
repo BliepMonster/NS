@@ -10,7 +10,7 @@ Some other expressions were able to be made pretty easily:
 * Function definitions were replaced by anonymous lambdas. For example, what would be `function f(a) {return a;}` in JS would be `f = (a) -> a;` in this language.
 * I could do the same with class definitions: `BinaryExpression = class(Expression) {.eval = () -> {}};` would create `BinaryExpression` extending `Expression` with an empty function .eval inside. More on classes later.
 * If/else statements can be replaced by the ternary operator `a ? b : c`.
-* While loops were trickier, but I decided to use lists. A while loop would run its body (an expression) while the condition remains true, and then add the result to a list. Then it would return the list. Syntax: `(condition)::body`. You can make it not waste memory by using the builting $ignoreWhileResult() function.
+* While loops were trickier, but I decided to use lists. A while loop would run its body (an expression) while the condition remains true, and then add the result to a list. Then it would return the list. Syntax: `(condition)::body`. You can make it not waste memory by using the builting $ignoreLoopResult() function, which optimizes while- and for loops.
 * Finally, I added block expressions. These would run a list of statements. To get a result from a block, use a `return` expression.
 * Return expressions still feel like cheating. Instead of it returning a value, it'd exit all expressions until it finds a block.
 ## cool features I thought were neat
@@ -183,7 +183,17 @@ You can also define custom iterators and iterables in objects using operator ove
 
 ## Example program
 ```
-$ print(((tmp1, tmp2, tmp3, c) -> ((until) -> (c <= until)::tmp3 + 0*(c += 1) + (0*(tmp1 = tmp2) + 0*(tmp2 = tmp3) + 0*(tmp3 = tmp1+tmp2))))(0, 0, 1, 1)(200));
+$ println(((tmp1, tmp2, tmp3, c, until) -> $last(((c += 1) <= until)::(tmp3 = (tmp1 = tmp2)+(tmp2 = tmp3))))(0, 0, 1, 0, 200));
 ```
 
-This prints the first 200 numbers in the fibonacci sequence.
+This prints the 200th number in the fibonacci sequence.
+
+## Optimization passes
+
+Before being interpreted, the program is passed to an optimizer. The optimizer optimizes the code by:
+* Folding constants (1+2 -> 3)
+* Making more literals ([1, 2, 3] is a literal instead of a list expression)
+* Turning classes with no superclass into literals
+* Eliminating dead match/ternary branches
+* Pre-computing some native functions
+* Performing basic type checking on literals or expressions and shortening equality or match expressions

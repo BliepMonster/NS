@@ -1,6 +1,5 @@
 package main.interpreter.values.builtins;
 
-import main.interpreter.Executor;
 import main.interpreter.values.InvalidOperationException;
 
 import java.util.HashMap;
@@ -8,10 +7,8 @@ import java.util.List;
 
 public final class VectorValue extends Value {
     public final NumericValue[] elements;
-    public final Executor executor;
     public final HashMap<String, CompiledFunctionValue> members = new HashMap<>();
-    public VectorValue(NumericValue[] elements, Executor executor) {
-        this.executor = executor;
+    public VectorValue(NumericValue[] elements) {
         this.elements = elements;
         members.put("expand", new CompiledFunctionValue() {
             @Override
@@ -32,7 +29,7 @@ public final class VectorValue extends Value {
                 for (int i = elements.length; i < newElements.length; i++) {
                     newElements[i] = NumericValue.ZERO;
                 }
-                return new VectorValue(newElements, executor);
+                return new VectorValue(newElements);
             }
         });
     }
@@ -54,7 +51,7 @@ public final class VectorValue extends Value {
         for (int i = 0; i < newElements.length; i++) {
             newElements[i] = (NumericValue) elements[i].add(vv.elements[i]);
         }
-        return new VectorValue(newElements, executor);
+        return new VectorValue(newElements);
     }
     public Value sub(Value v) {
         if (!(v instanceof VectorValue vv))
@@ -65,7 +62,7 @@ public final class VectorValue extends Value {
         for (int i = 0; i < newElements.length; i++) {
             newElements[i] = (NumericValue) elements[i].sub(vv.elements[i]);
         }
-        return new VectorValue(newElements, executor);
+        return new VectorValue(newElements);
     }
     public Value mul(Value v) {
         if (!(v instanceof NumericValue n))
@@ -74,7 +71,7 @@ public final class VectorValue extends Value {
         for (int i = 0; i < newElements.length; i++) {
             newElements[i] = (NumericValue) elements[i].mul(n);
         }
-        return new VectorValue(newElements, executor);
+        return new VectorValue(newElements);
     }
     public Value div(Value v) {
         if (!(v instanceof NumericValue n))
@@ -83,7 +80,7 @@ public final class VectorValue extends Value {
         for (int i = 0; i < newElements.length; i++) {
             newElements[i] = (NumericValue) elements[i].div(n);
         }
-        return new VectorValue(newElements, executor);
+        return new VectorValue(newElements);
     }
     public Value mod(Value v) {
         if (!(v instanceof NumericValue n))
@@ -92,7 +89,7 @@ public final class VectorValue extends Value {
         for (int i = 0; i < newElements.length; i++) {
             newElements[i] = (NumericValue) elements[i].mod(n);
         }
-        return new VectorValue(newElements, executor);
+        return new VectorValue(newElements);
     }
     public Value getMember(String s) {
         if (!members.containsKey(s))
@@ -120,7 +117,7 @@ public final class VectorValue extends Value {
         for (int i = 0; i < newElements.length; i++) {
             newElements[i] = (NumericValue) elements[i].neg();
         }
-        return new VectorValue(newElements, executor);
+        return new VectorValue(newElements);
     }
     public Value inv() {
         throw new InvalidOperationException("Cannot invert a vector");

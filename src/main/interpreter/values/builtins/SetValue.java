@@ -42,7 +42,7 @@ public final class SetValue extends Value {
     public SetValue(HashSet<Value> set) {
         this.set = set;
     }
-    public Value contains(Value v) {
+    public BooleanValue contains(Value v) {
         return BooleanValue.fromBoolean(set.contains(v));
     }
     public Value add(Value v) {

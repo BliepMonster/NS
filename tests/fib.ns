@@ -4,14 +4,15 @@ t = $clock();
 $ println(
     ((tmp1, tmp2, tmp3, c, until) ->
             $last(((c += 1) <= until)::
-                tmp3 = (tmp1 = tmp2)+(tmp2 = tmp3)
+                (tmp3 = (tmp1 = tmp2)+(tmp2 = tmp3))
         )
     )(0, 0, 1, 0, 2600000)
 );
 // can generate over 2.6 million in a second
 // fib(n) but can be configured to produce a list instead, very fast.
-// I don't know why you'd want 1500000 fibonacci though, it's infinity after like 3000
+// I don't know why you'd want such a high fibonacci number though, it's infinity after like 3000
 $ println($clock()-t);
+
 // RECURSIVE:
 $ println(
     (fib = (x) ->
@@ -19,3 +20,14 @@ $ println(
     )(10)
 );
 // crashes (stack overflow), very slow, generates only fib(n)
+
+// ITERATIVE:
+// we use a literal instead of an argument here, as the constant folder will optimize it away
+t = $clock();
+$ println(
+    ((tmp1, tmp2, tmp3) ->
+                $last((tmp3 = (tmp1 = tmp2)+(tmp2 = tmp3)) for counter in $step(0..2600000, 1))
+        )(0, 0, 1)
+);
+// equally fast to ALGORITHMIC, sometimes even faster
+$ println($clock() - t);

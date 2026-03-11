@@ -89,14 +89,26 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
                 throw new RuntimeException("Expected boolean value, got " + left);
             } if (bv.value) {
                 return left;
-            } else return expr.right.accept(this);
+            } else {
+                Value v = expr.right.accept(this);
+                if (!(v instanceof BooleanValue bv2)) {
+                    throw new RuntimeException("Expected boolean value, got " + v);
+                }
+                return bv2;
+            }
         } else if (t == TokenType.AND) {
             Value left = expr.left.accept(this);
             if (!(left instanceof BooleanValue bv)) {
                 throw new RuntimeException("Expected boolean value, got " + left);
             } if (!bv.value) {
                 return left;
-            } else return expr.right.accept(this);
+            } else {
+                Value v = expr.right.accept(this);
+                if (!(v instanceof BooleanValue bv2)) {
+                    throw new RuntimeException("Expected boolean value, got " + v);
+                }
+                return bv2;
+            }
         }
         return switch (t) {
             case PLUS -> expr.left.accept(this).add(expr.right.accept(this));
@@ -150,7 +162,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
             }
             values[i++] = nv;
         }
-        return new VectorValue(values, this);
+        return new VectorValue(values);
     }
     public Value visitLoopExpression(LoopExpression expr) {
         return evaluateLoop(expr, LoopEvaluationStrategy.ALL_ELEMENTS);
@@ -224,13 +236,16 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
     }
     public Value visitNativeFunctionCallExpression(NativeFunctionCallExpression expr) {
         switch (expr.name) {
-            case "ignoreWhileResult" -> {
+            case "ignoreLoopResult" -> {
                 if (expr.args.size() != 1) {
-                    throw new RuntimeException("ignoreWhileResult expects 1 argument");
+                    throw new RuntimeException("ignoreLoopResult expects 1 argument");
                 }
                 Expression cond = expr.args.getFirst();
                 if (!(cond instanceof LoopExpression loop)) {
-                    throw new RuntimeException("ignoreWhileResult expects a loop expression");
+                    if (cond instanceof ForExpression forExpr) {
+                        return executeForLoop(forExpr, LoopEvaluationStrategy.NO_ELEMENTS);
+                    }
+                    throw new RuntimeException("ignoreLoopResult expects a loop expression");
                 }
                 return evaluateLoop(loop, LoopEvaluationStrategy.NO_ELEMENTS);
             }
@@ -240,6 +255,9 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
                 }
                 Expression cond = expr.args.getFirst();
                 if (!(cond instanceof LoopExpression loop)) {
+                    if (cond instanceof ForExpression forExpr) {
+                        return executeForLoop(forExpr, LoopEvaluationStrategy.LAST_ONLY);
+                    }
                     return cond.accept(this).last();
                 }
                 return evaluateLoop(loop, LoopEvaluationStrategy.LAST_ONLY);
@@ -250,6 +268,9 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
                 }
                 Expression cond = expr.args.getFirst();
                 if (!(cond instanceof LoopExpression loop)) {
+                    if (cond instanceof ForExpression forExpr) {
+                        return executeForLoop(forExpr, LoopEvaluationStrategy.FIRST_ONLY);
+                    }
                     return cond.accept(this).first();
                 }
                 return evaluateLoop(loop, LoopEvaluationStrategy.FIRST_ONLY);
@@ -344,14 +365,36 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
         return new SetValue(set);
     }
     public Value visitForExpression(ForExpression expr) {
+        return executeForLoop(expr, LoopEvaluationStrategy.ALL_ELEMENTS);
+    }
+    Value executeForLoop(ForExpression expr, LoopEvaluationStrategy strategy) {
         Value list = expr.list.accept(this);
-        ArrayList<Value> values = new ArrayList<>();
+        ArrayList<Value> values = null;
+        if (strategy == LoopEvaluationStrategy.ALL_ELEMENTS)
+             values = new ArrayList<>();
         scope = new Scope(scope);
-        for (Value v : list) {
-            scope.assignLocal(expr.variable.text(), v);
-            values.add(expr.action.accept(this));
+        try {
+            Value last = NullValue.INSTANCE, first = NullValue.INSTANCE;
+            boolean isFirst = true;
+            for (Value v : list) {
+                scope.assignLocal(expr.variable.text(), v);
+                Value val = expr.action.accept(this);
+                if (isFirst) {
+                    isFirst = false;
+                    first = val;
+                }
+                last = val;
+                if (strategy == LoopEvaluationStrategy.ALL_ELEMENTS)
+                    values.add(val);
+            }
+            return switch (strategy) {
+                case ALL_ELEMENTS -> new ListValue(values);
+                case LAST_ONLY -> last;
+                case FIRST_ONLY -> first;
+                case NO_ELEMENTS -> NullValue.INSTANCE;
+            };
+        } finally {
+            scope = scope.parent;
         }
-        scope = scope.parent;
-        return new ListValue(values);
     }
 }
