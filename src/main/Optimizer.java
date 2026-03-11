@@ -420,10 +420,19 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
         if (iterator instanceof LiteralExpression lit) {
             if (lit.value instanceof RangeIterator range) {
                 if (!action.accept(new ContainsChecker(expr.variable.text()))) {
-                    return new RepeatExpression(action, range.size());
+                    return new RepeatExpression(action, range.size()).accept(this);
+                }
+            } else if (lit.value instanceof ListValue list) {
+                if (!action.accept(new ContainsChecker(expr.variable.text()))) {
+                    // we can be sure list.length() returns an integer
+                    return new RepeatExpression(action, (int) ((NumericValue) list.length()).number).accept(this);
+                } // TODO: list transformations at compile time
+            } else if (lit.value instanceof SetValue set) {
+                if (!action.accept(new ContainsChecker(expr.variable.text()))) {
+                    // we can be sure list.length() returns an integer
+                    return new RepeatExpression(action, (int) ((NumericValue) set.length()).number).accept(this);
                 }
             }
-            // TODO: other iteration forms (more complex)
         }
         return new ForExpression(action , iterator, expr.variable);
     }
@@ -544,6 +553,8 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
         return VariableType.UNKNOWN;
     }
     public Expression visitRepeatExpression(RepeatExpression expr) {
+        if (expr.repeat == 0)
+            return new LiteralExpression(new ListValue(new ArrayList<>()));
         return new RepeatExpression(expr.expr.accept(this), expr.repeat);
     }
 }
