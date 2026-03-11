@@ -12,7 +12,7 @@ import java.util.*;
 enum VariableType {
     NUMBER, BOOLEAN, STRING, ITERATOR, LIST, SET,
     DICTIONARY, CLASS, VECTOR, RANGE, FILE, NULL, FUNCTION,
-    STEP_LITERAL,
+    STEP_LITERAL, ENUM,
     UNKNOWN
 }
 
@@ -323,7 +323,7 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
         return new CatchExpression(left, expr.fallback.accept(this));
     }
     public Expression visitEnumDeclarationExpression(EnumDeclarationExpression expr) {
-        return expr;
+        return new LiteralExpression(new EnumValue(expr.members));
     }
     public Expression visitMatchExpression(MatchExpression expr) {
         Expression cond = expr.expr.accept(this);
@@ -423,6 +423,8 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                 return VariableType.VECTOR;
             else if (lit.value == NullValue.INSTANCE)
                 return VariableType.NULL;
+            else if (lit.value instanceof EnumValue)
+                return VariableType.ENUM;
             else if (lit.value instanceof RangeIterator)
                 return VariableType.STEP_LITERAL;
             else return VariableType.UNKNOWN;
@@ -456,6 +458,8 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
             return VariableType.RANGE;
         else if (cond instanceof VectorExpression)
             return VariableType.VECTOR;
+        else if (cond instanceof EnumDeclarationExpression)
+            return VariableType.ENUM;
         else if (cond instanceof AssignmentExpression assignment) {
             return fromType(assignment.value);
         } else if (cond instanceof IndexExpression ie) {

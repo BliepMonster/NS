@@ -29,5 +29,5 @@ $ println(
                 $last((tmp3 = (tmp1 = tmp2)+(tmp2 = tmp3)) for counter in $step(0..2600000, 1))
         )(0, 0, 1)
 );
-// equally fast to ALGORITHMIC, sometimes even faster
+// equally fast to ALGORITHMIC, sometimes even faster. In some tests, the difference can be up to 15%
 $ println($clock() - t);
