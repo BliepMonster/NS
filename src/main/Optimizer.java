@@ -487,22 +487,25 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
         Expression iterator = expr.list.accept(this);
         Expression action = expr.action.accept(this);
         if (iterator instanceof LiteralExpression lit) {
-            if (lit.value instanceof RangeIterator range) {
-                if (!action.accept(new ContainsChecker(expr.variable.text()))) {
-                    return new RepeatExpression(action, range.size()).accept(this);
+            switch (lit.value) {
+                case RangeIterator range -> {
+                    if (!action.accept(new ContainsChecker(expr.variable.text()))) {
+                        return new RepeatExpression(action, range.size()).accept(this);
+                    }
                 }
-            } else if (lit.value instanceof ListValue list) {
-                if (!action.accept(new ContainsChecker(expr.variable.text()))) {
-                    // we can be sure list.length() returns an integer
-                    return new RepeatExpression(action, (int) ((NumericValue) list.length()).number).accept(this);
-                } // TODO: list transformations at compile time
-            } else if (lit.value instanceof SetValue set) {
-                if (!action.accept(new ContainsChecker(expr.variable.text()))) {
-                    // we can be sure set.length() returns an integer
-                    return new RepeatExpression(action, (int) ((NumericValue) set.length()).number).accept(this);
+                case ListValue list -> {
+                    if (!action.accept(new ContainsChecker(expr.variable.text()))) {
+                        // we can be sure list.length() returns an integer
+                        return new RepeatExpression(action, (int) ((NumericValue) list.length()).number).accept(this);
+                    } // TODO: list transformations at compile time
                 }
-            } else {
-                throw new RuntimeException("Cannot use non-list/set/range iterator in for loop");
+                case SetValue set -> {
+                    if (!action.accept(new ContainsChecker(expr.variable.text()))) {
+                        // we can be sure set.length() returns an integer
+                        return new RepeatExpression(action, (int) ((NumericValue) set.length()).number).accept(this);
+                    }
+                }
+                case null, default -> throw new RuntimeException("Cannot use non-list/set/range iterator in for loop");
             }
         }
         return new ForExpression(action , iterator, expr.variable);
