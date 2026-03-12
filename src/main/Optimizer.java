@@ -233,7 +233,11 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
         return new LiteralExpression(new ListValue(literals));
     }
     public Expression visitMemberExpression(MemberExpression expr) {
-        return new MemberExpression(expr.expr.accept(this), expr.member);
+        Expression owner = expr.expr.accept(this);
+        if (owner instanceof LiteralExpression lit) {
+            return new LiteralExpression(lit.value.getMember(expr.member));
+        }
+        return new MemberExpression(owner, expr.member);
     }
     public Expression visitLiteralExpression(LiteralExpression expr) {
         return expr;
