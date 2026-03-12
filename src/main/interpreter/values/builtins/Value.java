@@ -38,7 +38,9 @@ public sealed abstract class Value implements Iterable<Value>, Iterator<Value>
         // hash sets
         SetValue,
         // builtins eg files
-        BuiltinObjectValue
+        BuiltinObjectValue,
+        // big numbers (special case)
+        BigNumberValue
 {
     public abstract Value add(Value other);
     public abstract Value sub(Value other);

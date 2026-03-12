@@ -27,9 +27,10 @@ $ println(
 t = $clock();
 $ println(
     ((tmp1, tmp2, tmp3) ->
-                $last((tmp3 = (tmp1 = tmp2)+(tmp2 = tmp3)) for counter in $step(0..2600000, 1))
-        )(0, 0, 1)
+                $last((tmp3 = (tmp1 = tmp2)+(tmp2 = tmp3)) for counter in $step(0..200000, 1))
+        )($bignum(0), $bignum(0), $bignum(1))
 );
+// using bignums here for tests. significantly slower unless using normal doubles
 // equally fast to ALGORITHMIC, sometimes even faster. In some tests, the difference can be up to 40%
 // the compiler optimizes the for loop away and turns it into a simple incrementing loop variable, which makes this more powerful
 $ println("Time spent:", ($clock() - t));

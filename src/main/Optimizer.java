@@ -3,9 +3,7 @@ package main;
 import main.expr.*;
 import main.interpreter.values.InvalidOperationException;
 import main.interpreter.values.builtins.*;
-import main.interpreter.values.natives.IteratorValue;
-import main.interpreter.values.natives.RangeIterator;
-import main.interpreter.values.natives.StepRange;
+import main.interpreter.values.natives.*;
 import utils.ContainsChecker;
 import utils.SideEffectAnalyzer;
 
@@ -16,11 +14,11 @@ import java.util.*;
  * The Optimizer class will try to get code to its most optimal form. <br><br>
  * It will not remove or introduce side effects, and it will not add bugs.
  * However, it assumes code works. Some optimizations may hide or obfuscate bugs, or even accidentally remove them completely.
- * <br>Take for example:
- * `
+ * <br><br>Take for example:
+ * <br>{@code
  * x = 0+obj;
- * `
- * Here, it will try to turn it into `x=obj`. If obj is not a number, these are not equivalent. However, if obj is not a number, the code would've crashed anyway.
+ * }<br>
+ * Here, it will try to turn it into {@code x = obj}. If obj is not a number, these are not equivalent. However, if obj is not a number, the code would've crashed anyway.
  */
 public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor<Expression> {
     private final ArrayList<Statement> statements;
@@ -28,7 +26,7 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
     public enum VariableType {
         NUMBER, BOOLEAN, STRING, ITERATOR, LIST, SET,
         DICTIONARY, CLASS, VECTOR, RANGE, NULL, FUNCTION,
-        STEP_LITERAL, ENUM,
+        STEP_LITERAL, ENUM, BIG_NUMBER,
         UNKNOWN
     }
 
@@ -525,6 +523,8 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                 return VariableType.SET;
             else if (lit.value instanceof DictionaryValue)
                 return VariableType.DICTIONARY;
+            else if (lit.value instanceof BigNumberValue)
+                return VariableType.BIG_NUMBER;
             else if (lit.value instanceof RangeValue)
                 return VariableType.RANGE;
             else if (lit.value instanceof VectorValue)
@@ -543,6 +543,7 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                 case "clock" -> VariableType.NUMBER;
                 case "ignoreLoopResult" -> VariableType.NULL;
                 case "step" -> VariableType.STEP_LITERAL;
+                case "bignum" -> VariableType.BIG_NUMBER;
                 default -> VariableType.UNKNOWN;
             };
         } else if (cond instanceof TernaryExpression te) {
@@ -585,13 +586,28 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                         yield VariableType.DICTIONARY;
                     else yield VariableType.UNKNOWN;
                 }
+                case PLUS, MOD, STAR, MINUS -> {
+                    if (getType(be.left) == VariableType.NUMBER)
+                        yield VariableType.NUMBER;
+                    else if (getType(be.left) == VariableType.BIG_NUMBER)
+                        yield VariableType.BIG_NUMBER;
+                    else if (getType(be.left) == VariableType.VECTOR)
+                        yield VariableType.VECTOR;
+                    else if (getType(be.left) == VariableType.FUNCTION)
+                        yield VariableType.FUNCTION;
+                    yield VariableType.UNKNOWN;
+                }
                 case SLASH -> {
                     if (getType(be.left) == VariableType.NUMBER)
                         yield VariableType.NUMBER;
+                    else if (getType(be.left) == VariableType.BIG_NUMBER)
+                        yield VariableType.BIG_NUMBER;
                     else if (getType(be.left) == VariableType.VECTOR)
                         yield VariableType.VECTOR;
                     else if (getType(be.left) == VariableType.SET)
                         yield VariableType.SET;
+                    else if (getType(be.left) == VariableType.FUNCTION)
+                        yield VariableType.FUNCTION;
                     else yield VariableType.UNKNOWN;
                 }
                 default -> VariableType.UNKNOWN;
@@ -601,6 +617,8 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                 case MINUS -> {
                     if (getType(ue.expr) == VariableType.NUMBER)
                         yield VariableType.NUMBER;
+                    else if (getType(ue.expr) == VariableType.BIG_NUMBER)
+                        yield VariableType.BIG_NUMBER;
                     else yield VariableType.UNKNOWN;
                 }
                 case BANG -> {
@@ -610,7 +628,7 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                 }
                 case QUESTION -> VariableType.BOOLEAN;
                 case HASH -> {
-                    if (getType(ue.expr) != VariableType.NUMBER)
+                    if (getType(ue.expr) != VariableType.UNKNOWN)
                         yield VariableType.NUMBER;
                     else yield VariableType.UNKNOWN;
                 }
@@ -620,14 +638,47 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
             return VariableType.LIST;
         } else if (cond instanceof FunctionDeclarationExpression) {
             return VariableType.FUNCTION;
+        } else if (cond instanceof CatchExpression ce) {
+            VariableType t = getType(ce.expr);
+            if (t == getType(ce.fallback))
+                return t;
+            return VariableType.UNKNOWN;
+        } else if (cond instanceof MatchExpression me) {
+            VariableType t = null;
+            for (MatchExpression.Case match : me.cases) {
+                if (t == null) {
+                    t = getType(match.pattern());
+                } else if (t != getType(match.pattern())) {
+                    return VariableType.UNKNOWN;
+                }
+            }
+            if (me.other != null) {
+                VariableType ot = getType(me.other);
+                if (t == ot)
+                    return t;
+                return VariableType.UNKNOWN;
+            }
+            return t;
         }
         return VariableType.UNKNOWN;
     }
     public Expression visitRepeatExpression(RepeatExpression expr) {
         if (expr.repeat == 0)
             return new LiteralExpression(new ListValue(new ArrayList<>()));
-        else if (expr.repeat == 1)
-            return new ListExpression(List.of(expr.expr.accept(this)));
+        else if (expr.repeat <= 5) {
+            ArrayList<Expression> expressions = new ArrayList<>();
+            Expression optimizedExpr = expr.expr.accept(this);
+            for (int i = 0; i < expr.repeat; i++) {
+                expressions.add(optimizedExpr);
+            }
+            return new ListExpression(expressions).accept(this);
+        } else if (expr.expr instanceof LiteralExpression le) {
+            ArrayList<Value> values = new ArrayList<>();
+            for (int i = 0; i < expr.repeat; i++) {
+                values.add(le.value);
+            }
+            return new LiteralExpression(new ListValue(values));
+        }
         return new RepeatExpression(expr.expr.accept(this), expr.repeat);
     }
 }

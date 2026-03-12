@@ -60,7 +60,7 @@ public class SideEffectAnalyzer implements StatementVisitor<Boolean>, Expression
                 Optimizer.VariableType type = Optimizer.getType(expr.args.getFirst());
                 yield type == Optimizer.VariableType.UNKNOWN;
             }
-            case "ignoreLoopResult", "clock", "step" -> false; // if the loop contains no side effects
+            case "ignoreLoopResult", "clock", "bignum", "step" -> false; // if the loop contains no side effects
             case "first", "last" -> {
                 if (expr.args.size() != 1)
                     throw new RuntimeException("first() or last() take exactly one argument");

@@ -7,6 +7,7 @@ import main.interpreter.values.natives.IteratorValue;
 import main.interpreter.values.natives.RangeIterator;
 import main.interpreter.values.natives.StepRange;
 
+import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
@@ -101,6 +102,17 @@ public class FunctionRegistry {
                 if (args.size() != 1)
                     throw new InvalidOperationException("len() takes exactly one argument");
                 return args.getFirst().length();
+            }
+        });
+        functions.put("bignum", new CompiledFunctionValue() {
+            @Override
+            public Value call(List<Value> args) {
+                if (args.size() != 1)
+                    throw new InvalidOperationException("bignum() takes exactly one argument");
+                Value v = args.getFirst();
+                if (!(v instanceof NumericValue nv))
+                    throw new InvalidOperationException("bignum() takes exactly one argument");
+                return BigNumberValue.of(BigDecimal.valueOf(nv.number));
             }
         });
     }
