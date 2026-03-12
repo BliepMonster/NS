@@ -5,7 +5,9 @@ import main.interpreter.values.InvalidOperationException;
 import main.interpreter.values.builtins.*;
 import main.interpreter.values.natives.*;
 import utils.ContainsChecker;
+import utils.Replacer;
 import utils.SideEffectAnalyzer;
+import utils.VariableLister;
 
 import java.util.*;
 
@@ -497,13 +499,49 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                     if (!action.accept(new ContainsChecker(expr.variable.text()))) {
                         // we can be sure list.length() returns an integer
                         return new RepeatExpression(action, (int) ((NumericValue) list.length()).number).accept(this);
-                    } // TODO: list transformations at compile time
+                    }
+                    if (action.accept(analyzer))
+                        return new ForExpression(action, iterator, expr.variable);
+                    HashSet<String> vars = action.accept(new VariableLister());
+                    if (vars.size() != 1) {
+                        return new ForExpression(action, iterator, expr.variable);
+                    }
+                    String var = vars.iterator().next();
+                    if (!var.equals(expr.variable.text())) {
+                        // should've normally been caught by the contains checker
+                        return new ForExpression(action, iterator, expr.variable);
+                    }
+                    ArrayList<Expression> bodies = new ArrayList<>();
+                    for (Value value : list) {
+                        Expression literal = new LiteralExpression(value);
+                        Expression body = action.accept(new Replacer(literal, var));
+                        bodies.add(body);
+                    }
+                    return new ListExpression(bodies).accept(this);
                 }
                 case SetValue set -> {
                     if (!action.accept(new ContainsChecker(expr.variable.text()))) {
                         // we can be sure set.length() returns an integer
                         return new RepeatExpression(action, (int) ((NumericValue) set.length()).number).accept(this);
                     }
+                    if (action.accept(analyzer))
+                        return new ForExpression(action, iterator, expr.variable);
+                    HashSet<String> vars = action.accept(new VariableLister());
+                    if (vars.size() != 1) {
+                        return new ForExpression(action, iterator, expr.variable);
+                    }
+                    String var = vars.iterator().next();
+                    if (!var.equals(expr.variable.text())) {
+                        // should've normally been caught by the contains checker
+                        return new ForExpression(action, iterator, expr.variable);
+                    }
+                    ArrayList<Expression> bodies = new ArrayList<>();
+                    for (Value value : set) {
+                        Expression literal = new LiteralExpression(value);
+                        Expression body = action.accept(new Replacer(literal, var));
+                        bodies.add(body);
+                    }
+                    return new SetExpression(bodies).accept(this);
                 }
                 case null, default -> throw new RuntimeException("Cannot use non-list/set/range iterator in for loop");
             }
