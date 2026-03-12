@@ -498,9 +498,11 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                 } // TODO: list transformations at compile time
             } else if (lit.value instanceof SetValue set) {
                 if (!action.accept(new ContainsChecker(expr.variable.text()))) {
-                    // we can be sure list.length() returns an integer
+                    // we can be sure set.length() returns an integer
                     return new RepeatExpression(action, (int) ((NumericValue) set.length()).number).accept(this);
                 }
+            } else {
+                throw new RuntimeException("Cannot use non-list/set/range iterator in for loop");
             }
         }
         return new ForExpression(action , iterator, expr.variable);

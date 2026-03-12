@@ -41,6 +41,12 @@ public class SideEffectAnalyzer implements StatementVisitor<Boolean>, Expression
         return expr.expr.accept(this);
     }
     public Boolean visitFunctionCallExpression(FunctionCallExpression expr) {
+        for (Expression arg : expr.args) {
+            if (arg.accept(this)) return true;
+        }
+        if (expr.function instanceof FunctionDeclarationExpression fd) {
+            return fd.body.accept(this); // in reality, this is just a glorified expression call with local argument assignments (which are popped after execution)
+        }
         return true;
     }
     public Boolean visitNativeFunctionCallExpression(NativeFunctionCallExpression expr) {
