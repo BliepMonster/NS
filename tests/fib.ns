@@ -32,4 +32,4 @@ $ println(
 );
 // equally fast to ALGORITHMIC, sometimes even faster. In some tests, the difference can be up to 40%
 // the compiler optimizes the for loop away and turns it into a simple incrementing loop variable, which makes this more powerful
-$ println($clock() - t);
+$ println("Time spent:", ($clock() - t));

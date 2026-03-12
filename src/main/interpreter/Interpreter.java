@@ -404,29 +404,32 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
         }
     }
     Value executeRepeat(RepeatExpression expr, LoopEvaluationStrategy strategy) {
-        ArrayList<Value> values = null;
-        if (strategy == LoopEvaluationStrategy.ALL_ELEMENTS)
-            values = new ArrayList<>();
-        scope = new Scope(scope);
-        Value last = NullValue.INSTANCE, first = NullValue.INSTANCE;
-        boolean isFirst = true;
-        for (int i = 0; i < expr.repeat; ++i) {
-            Value v = expr.expr.accept(this);
-            if (isFirst) {
-                isFirst = false;
-                first = v;
-            }
-            last = v;
+        try {
+            ArrayList<Value> values = null;
             if (strategy == LoopEvaluationStrategy.ALL_ELEMENTS)
-                values.add(v);
+                values = new ArrayList<>();
+            scope = new Scope(scope);
+            Value last = NullValue.INSTANCE, first = NullValue.INSTANCE;
+            boolean isFirst = true;
+            for (int i = 0; i < expr.repeat; ++i) {
+                Value v = expr.expr.accept(this);
+                if (isFirst) {
+                    isFirst = false;
+                    first = v;
+                }
+                last = v;
+                if (strategy == LoopEvaluationStrategy.ALL_ELEMENTS)
+                    values.add(v);
+            }
+            return switch (strategy) {
+                case ALL_ELEMENTS -> new ListValue(values);
+                case LAST_ONLY -> last;
+                case FIRST_ONLY -> first;
+                case NO_ELEMENTS -> NullValue.INSTANCE;
+            };
+        } finally {
+            scope = scope.parent;
         }
-        scope = scope.parent;
-        return switch (strategy) {
-            case ALL_ELEMENTS -> new ListValue(values);
-            case LAST_ONLY -> last;
-            case FIRST_ONLY -> first;
-            case NO_ELEMENTS -> NullValue.INSTANCE;
-        };
     }
     public Value visitRepeatExpression(RepeatExpression expr) {
         return executeRepeat(expr, LoopEvaluationStrategy.ALL_ELEMENTS);

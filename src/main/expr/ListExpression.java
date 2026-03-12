@@ -1,10 +1,10 @@
 package main.expr;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class ListExpression extends Expression {
-    public final ArrayList<Expression> elements;
-    public ListExpression(ArrayList<Expression> elements) {
+    public final List<Expression> elements;
+    public ListExpression(List<Expression> elements) {
         this.elements = elements;
     }
     public <R> R accept(ExpressionVisitor<R> visitor) {

@@ -1,10 +1,10 @@
 package main.expr;
 
-import java.util.Set;
+import java.util.List;
 
 public class SetExpression extends Expression {
-    public final Set<Expression> expr;
-    public SetExpression(Set<Expression> expr) {
+    public final List<Expression> expr;
+    public SetExpression(List<Expression> expr) {
         this.expr = expr;
     }
     public <R> R accept(ExpressionVisitor<R> visitor) {

@@ -7,30 +7,48 @@ import main.interpreter.values.natives.IteratorValue;
 import main.interpreter.values.natives.RangeIterator;
 import main.interpreter.values.natives.StepRange;
 import utils.ContainsChecker;
+import utils.SideEffectAnalyzer;
 
 import java.util.*;
 
-enum VariableType {
-    NUMBER, BOOLEAN, STRING, ITERATOR, LIST, SET,
-    DICTIONARY, CLASS, VECTOR, RANGE, FILE, NULL, FUNCTION,
-    STEP_LITERAL, ENUM,
-    UNKNOWN
-}
 
+/**
+ * The Optimizer class will try to get code to its most optimal form. <br><br>
+ * It will not remove or introduce side effects, and it will not add bugs.
+ * However, it assumes code works. Some optimizations may hide or obfuscate bugs, or even accidentally remove them completely.
+ * <br>Take for example:
+ * `
+ * x = 0+obj;
+ * `
+ * Here, it will try to turn it into `x=obj`. If obj is not a number, these are not equivalent. However, if obj is not a number, the code would've crashed anyway.
+ */
 public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor<Expression> {
     private final ArrayList<Statement> statements;
+    private static final SideEffectAnalyzer analyzer = new SideEffectAnalyzer();
+    public enum VariableType {
+        NUMBER, BOOLEAN, STRING, ITERATOR, LIST, SET,
+        DICTIONARY, CLASS, VECTOR, RANGE, NULL, FUNCTION,
+        STEP_LITERAL, ENUM,
+        UNKNOWN
+    }
+
     public Optimizer(ArrayList<Statement> statements) {
         this.statements = statements;
     }
     public ArrayList<Statement> optimize() {
         ArrayList<Statement> optimizedStatements = new ArrayList<>();
         for (Statement statement : statements) {
-            optimizedStatements.add(statement.accept(this));
+            Statement optimizedStatement = statement.accept(this);
+            if (optimizedStatement != null)
+                optimizedStatements.add(optimizedStatement);
         }
         return optimizedStatements;
     }
     public Statement visitExpressionStatement(ExpressionStatement stmt) {
-        return new ExpressionStatement(stmt.expr.accept(this));
+        Expression expr = stmt.expr.accept(this);
+        if (!expr.accept(analyzer))
+            return null;
+        return new ExpressionStatement(expr);
     }
     public Expression visitReturnExpression(ReturnExpression expr) {
         return new ReturnExpression(expr.value.accept(this));
@@ -44,7 +62,7 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
     public Expression visitAssignmentExpression(AssignmentExpression expr) {
         return new AssignmentExpression(expr.target, expr.value.accept(this), expr.token);
     }
-    // operator overloading prevents us from going any deeper
+    // operator overloading prevents us from optimizing the right
     public Expression visitBinaryExpression(BinaryExpression expr) {
         Expression left = expr.left.accept(this);
         Expression right = expr.right.accept(this);
@@ -95,7 +113,28 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                         yield right;
                     yield left;
                 }
-                default -> expr;
+                case PLUS -> {
+                    if (lv.value instanceof NumericValue lvnum) {
+                        if (lvnum.number == 0)
+                            yield right;
+                    }
+                    else if (lv.value instanceof StringValue lvstr) {
+                        if (lvstr.getValue().isEmpty())
+                            // replace by str() call
+                            yield (new NativeFunctionCallExpression("str", new ArrayList<>(List.of(right)))).accept(this);
+                    }
+                    yield new BinaryExpression(lv, expr.op, right);
+                }
+                case STAR -> {
+                    if (lv.value instanceof NumericValue lvnum) {
+                        if (lvnum.number == 1)
+                            yield right;
+                        else if (lvnum.number == 0 && right.accept(analyzer))
+                            yield lv;
+                    }
+                    yield new BinaryExpression(lv, expr.op, right);
+                }
+                default ->  new BinaryExpression(left, expr.op, right);
             };
         } else if (right instanceof LiteralExpression rv) {
             return switch (expr.op.type()) {
@@ -113,7 +152,7 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                         yield left;
                     yield new BinaryExpression(left, expr.op, rv);
                 }
-                default -> expr;
+                default -> new BinaryExpression(left, expr.op, rv);
             };
         } if (expr.op.type() == TokenType.EQEQ) {
             VariableType ltype = getType(left);
@@ -229,7 +268,7 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                 throw new RuntimeException("Cannot use non-boolean value in loop");
             if (!bv.value)
                 return new LiteralExpression(new ListValue(new ArrayList<>()));
-            // otherwise: infinite loop -> ignore
+            // otherwise: infinite loop -> normal case: true + expr.optimize
         }
         return new LoopExpression(cond, expr.body.accept(this));
     }
@@ -237,6 +276,8 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
         ArrayList<Statement> statements = new ArrayList<>();
         for (Statement statement : expr.statements) {
             Statement optimizedStatement = statement.accept(this);
+            if (optimizedStatement == null)
+                continue;
             statements.add(optimizedStatement);
             if (optimizedStatement instanceof ExpressionStatement est && est.expr instanceof ReturnExpression)
                 break;
@@ -302,7 +343,37 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                 Expression arg = arguments.getFirst();
                 if (arg instanceof LiteralExpression lit) {
                     return new LiteralExpression(new StringValue(lit.value.toString()));
+                } else if (getType(arg) == VariableType.STRING)
+                    return arg;
+            }
+            case "print" -> {
+                ArrayList<Value> vals = new ArrayList<>();
+                for (Expression argument : arguments) {
+                    if (!(argument instanceof LiteralExpression lit))
+                        return new NativeFunctionCallExpression(expr.name, arguments);
+                    vals.add(lit.value);
                 }
+                StringBuilder sb = new StringBuilder();
+                for (Value val : vals) {
+                    sb.append(val.toString());
+                    sb.append(" ");
+                }
+                return new NativeFunctionCallExpression("print", List.of(new LiteralExpression(new StringValue(sb.toString()))));
+            }
+            case "println" -> {
+                ArrayList<Value> vals = new ArrayList<>();
+                for (Expression argument : arguments) {
+                    if (!(argument instanceof LiteralExpression lit))
+                        return new NativeFunctionCallExpression(expr.name, arguments);
+                    vals.add(lit.value);
+                }
+                StringBuilder sb = new StringBuilder();
+                for (Value val : vals) {
+                    sb.append(val.toString());
+                    sb.append(" ");
+                }
+                sb.append('\n');
+                return new NativeFunctionCallExpression("print", List.of(new LiteralExpression(new StringValue(sb.toString()))));
             }
             case "len" -> {
                 if (arguments.size() != 1)
@@ -402,17 +473,17 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
         return new DictionaryExpression(keys);
     }
     public Expression visitSetExpression(SetExpression expr) {
-        Set<Expression> elements = new HashSet<>();
+        List<Expression> elements = new ArrayList<>();
         for (Expression element : expr.expr) {
             elements.add(element.accept(this));
         }
-        HashSet<Value> literals = new HashSet<>();
+        List<Value> literals = new ArrayList<>();
         for (Expression element : elements) {
             if (!(element instanceof LiteralExpression le))
                 return new SetExpression(elements);
             literals.add(le.value);
         }
-        return new LiteralExpression(new SetValue(literals));
+        return new LiteralExpression(new SetValue(new HashSet<>(literals)));
     }
     public Expression visitForExpression(ForExpression expr) {
         Expression iterator = expr.list.accept(this);
@@ -436,7 +507,9 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
         }
         return new ForExpression(action , iterator, expr.variable);
     }
-    VariableType getType(Expression cond) {
+    public static VariableType getType(Expression cond) {
+        if (cond.accept(analyzer))
+            return VariableType.UNKNOWN;
         if (cond instanceof LiteralExpression lit) {
             if (lit.value instanceof NumericValue)
                 return VariableType.NUMBER;
@@ -466,10 +539,9 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
         } else if (cond instanceof NativeFunctionCallExpression nfce) {
             return switch (nfce.name) {
                 case "iter" -> VariableType.ITERATOR;
-                case "str", "input" -> VariableType.STRING;
-                case "openFileReadingHandle" -> VariableType.FILE;
+                case "str" -> VariableType.STRING;
                 case "clock" -> VariableType.NUMBER;
-                case "print", "println", "ignoreLoopResult" -> VariableType.NULL;
+                case "ignoreLoopResult" -> VariableType.NULL;
                 case "step" -> VariableType.STEP_LITERAL;
                 default -> VariableType.UNKNOWN;
             };
@@ -544,17 +616,18 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                 }
                 default -> VariableType.UNKNOWN;
             };
-        } else if (cond instanceof ForExpression || cond instanceof LoopExpression) {
+        } else if (cond instanceof ForExpression || cond instanceof LoopExpression || cond instanceof RepeatExpression) {
             return VariableType.LIST;
         } else if (cond instanceof FunctionDeclarationExpression) {
             return VariableType.FUNCTION;
-        } else if (cond instanceof RepeatExpression)
-            return VariableType.LIST;
+        }
         return VariableType.UNKNOWN;
     }
     public Expression visitRepeatExpression(RepeatExpression expr) {
         if (expr.repeat == 0)
             return new LiteralExpression(new ListValue(new ArrayList<>()));
+        else if (expr.repeat == 1)
+            return new ListExpression(List.of(expr.expr.accept(this)));
         return new RepeatExpression(expr.expr.accept(this), expr.repeat);
     }
 }

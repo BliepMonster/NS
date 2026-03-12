@@ -418,7 +418,7 @@ public class Parser {
         return new DictionaryExpression(pairs);
     }
     Expression set() {
-        HashSet<Expression> exprs = new HashSet<>();
+        ArrayList<Expression> exprs = new ArrayList<>();
         if (!check(RBRACKET)) {
             do {
                 exprs.add(expression());
