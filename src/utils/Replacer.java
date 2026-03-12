@@ -140,4 +140,10 @@ public class Replacer implements ExpressionVisitor<Expression>, StatementVisitor
     public Expression visitRepeatExpression(RepeatExpression expr) {
         return new RepeatExpression(expr.expr.accept(this), expr.repeat);
     }
+    public Expression visitNumericBinaryExpression(NumericBinaryExpression expr) {
+        return new NumericBinaryExpression(expr.left.accept(this), expr.op, expr.right.accept(this));
+    }
+    public Expression visitNumericUnaryExpression(NumericUnaryExpression expr) {
+        return new NumericUnaryExpression(expr.expr.accept(this), expr.op);
+    }
 }

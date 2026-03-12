@@ -129,4 +129,10 @@ public class ContainsChecker implements ExpressionVisitor<Boolean>, StatementVis
     public Boolean visitRepeatExpression(RepeatExpression expr) {
         return expr.expr.accept(this);
     }
+    public Boolean visitNumericBinaryExpression(NumericBinaryExpression expr) {
+        return expr.left.accept(this) || expr.right.accept(this);
+    }
+    public Boolean visitNumericUnaryExpression(NumericUnaryExpression expr) {
+        return expr.expr.accept(this);
+    }
 }

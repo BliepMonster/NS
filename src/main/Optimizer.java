@@ -11,6 +11,8 @@ import utils.VariableLister;
 
 import java.util.*;
 
+import static main.TokenType.*;
+
 
 /**
  * The Optimizer class will try to get code to its most optimal form. <br><br>
@@ -117,6 +119,8 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                     if (lv.value instanceof NumericValue lvnum) {
                         if (lvnum.number == 0)
                             yield right;
+                        else if (getType(right) == VariableType.NUMBER)
+                            yield new NumericBinaryExpression(lv, expr.op, right).accept(this);
                     }
                     else if (lv.value instanceof StringValue lvstr) {
                         if (lvstr.getValue().isEmpty())
@@ -131,6 +135,8 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                             yield right;
                         else if (lvnum.number == 0 && right.accept(analyzer))
                             yield lv;
+                        else if (getType(right) == VariableType.NUMBER)
+                            yield new NumericBinaryExpression(lv, expr.op, right).accept(this);
                     }
                     yield new BinaryExpression(lv, expr.op, right);
                 }
@@ -172,7 +178,8 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                 return new BinaryExpression(left, expr.op, right);
             if (ltype != rtype)
                 return new LiteralExpression(BooleanValue.TRUE);
-        }
+        } if (getType(left) == VariableType.NUMBER && getType(right) == VariableType.NUMBER)
+            return new NumericBinaryExpression(left, expr.op, right).accept(this);
         return new BinaryExpression(left, expr.op, right);
     }
     public Expression visitUnaryExpression(UnaryExpression expr) {
@@ -184,6 +191,8 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                         return expression;
                     else
                         return new UnaryExpression(expr.op, expression);
+                if (getType(expression) == VariableType.NUMBER)
+                    return new NumericUnaryExpression(expression, expr.op).accept(this);
                 return new LiteralExpression(literal.value.isTruthy());
             }
             case HASH -> {
@@ -199,6 +208,8 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                     return unary.expr;
                 else if (expression instanceof LiteralExpression literal)
                     return new LiteralExpression(literal.value.neg());
+                if (getType(expression) == VariableType.NUMBER)
+                    return new NumericUnaryExpression(expression, expr.op).accept(this);
                 return new UnaryExpression(expr.op, expression);
             }
             case BANG -> {
@@ -206,6 +217,17 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                     return new LiteralExpression(lit.value.inv());
                 } else if (expression instanceof UnaryExpression ue && ue.op.type() == TokenType.BANG) {
                     return ue.expr;
+                } else if (expression instanceof UnaryExpression ue && ue.op.type() == TokenType.QUESTION) {
+                    return new UnaryExpression(new Token("!?", ARTIFICIAL_NBOOL, expr.op.line()), ue.expr);
+                } else if (expression instanceof UnaryExpression ue && ue.op.type() == ARTIFICIAL_NBOOL) {
+                    return new UnaryExpression(new Token("?", QUESTION, expr.op.line()), ue.expr);
+                }
+            }
+            case ARTIFICIAL_NBOOL -> {
+                if (expression instanceof LiteralExpression lit) {
+                    return new LiteralExpression(lit.value.isTruthy().inv());
+                } else if (expression instanceof UnaryExpression ue && ue.op.type() == TokenType.QUESTION) {
+                    return new UnaryExpression(expr.op, ue.expr);
                 }
             }
         }
@@ -618,9 +640,12 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
         else if (cond instanceof AssignmentExpression assignment) {
             return getType(assignment.value);
         } else if (cond instanceof IndexExpression ie) {
-            if (getType(ie.expr) == VariableType.STRING) {
+            VariableType t = getType(ie.expr);
+            if (t == VariableType.STRING)
                 return VariableType.STRING;
-            }
+            else if (t == VariableType.VECTOR)
+                return VariableType.NUMBER;
+            else return VariableType.UNKNOWN;
         } else if (cond instanceof BinaryExpression be) {
             return switch (be.op.type()) {
                 case IN, OR, AND, EQEQ, BANG_EQ, GT, LT, GTEQ, LTEQ -> VariableType.BOOLEAN;
@@ -673,7 +698,7 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                         yield VariableType.BOOLEAN;
                     else yield VariableType.UNKNOWN;
                 }
-                case QUESTION -> VariableType.BOOLEAN;
+                case QUESTION, ARTIFICIAL_NBOOL -> VariableType.BOOLEAN;
                 case HASH -> {
                     if (getType(ue.expr) != VariableType.UNKNOWN)
                         yield VariableType.NUMBER;
@@ -706,6 +731,18 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                 return VariableType.UNKNOWN;
             }
             return t;
+        } else if (cond instanceof NumericBinaryExpression nb) {
+            return switch (nb.op.type()) {
+                case PLUS, MINUS, STAR, SLASH, MOD -> VariableType.NUMBER;
+                case EQEQ, BANG_EQ, GT, LT, GTEQ, LTEQ -> VariableType.BOOLEAN;
+                default -> VariableType.UNKNOWN;
+            };
+        } else if (cond instanceof NumericUnaryExpression nu) {
+            return switch (nu.op.type()) {
+                case MINUS, HASH -> VariableType.NUMBER;
+                case QUESTION, ARTIFICIAL_NBOOL -> VariableType.BOOLEAN;
+                default -> VariableType.UNKNOWN;
+            };
         }
         return VariableType.UNKNOWN;
     }
@@ -728,4 +765,66 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
         }
         return new RepeatExpression(expr.expr.accept(this), expr.repeat);
     }
+    // policy is that constants should have been folded already and all left-optimization should have already taken place.
+    // only visitBinaryExpression may spawn these
+    public Expression visitNumericBinaryExpression(NumericBinaryExpression expr) {
+        Expression left = expr.left.accept(this);
+        Expression right = expr.right.accept(this);
+        if (left instanceof LiteralExpression lit) {
+            NumericValue lv = (NumericValue) lit.value;
+            switch (expr.op.type()) {
+                case MINUS -> {
+                    if (lv.number == 0)
+                        return new NumericUnaryExpression(right, expr.op);
+                }
+                case BANG_EQ -> {
+                    if (lv.number == 0)
+                        return new NumericUnaryExpression(right, new Token("?", QUESTION, expr.op.line())).accept(this);
+                }
+                case EQEQ -> {
+                    if (lv.number == 0)
+                        return new NumericUnaryExpression(right, new Token("!?", ARTIFICIAL_NBOOL, expr.op.line())).accept(this);
+                }
+            }
+        }
+        // right side optimization still possible
+        if (right instanceof LiteralExpression lit) {
+            NumericValue nv = (NumericValue) lit.value;
+            switch (expr.op.type()) {
+                case MINUS, PLUS -> {
+                    if (nv.number == 0)
+                        return left;
+                }
+                case STAR, SLASH -> {
+                    if (nv.number == 1)
+                        return left;
+                }
+                case MOD -> {
+                    if (nv.number == 0)
+                        throw new RuntimeException("Modulo by zero");
+                }
+                case BANG_EQ -> {
+                    if (nv.number == 0)
+                        return new NumericUnaryExpression(left, new Token("?", QUESTION, expr.op.line())).accept(this);
+                }
+                case EQEQ -> {
+                    if (nv.number == 0)
+                        return new NumericUnaryExpression(left, new Token("!?", ARTIFICIAL_NBOOL, expr.op.line())).accept(this);
+                }
+            }
+        }
+        return new NumericBinaryExpression(left, expr.op, right);
+    }
+    // policy is same as binary
+    public Expression visitNumericUnaryExpression(NumericUnaryExpression expr) {
+        Expression e = expr.expr.accept(this);
+        if (expr.op.type() == HASH)
+            return e;
+        return new NumericUnaryExpression(e, expr.op);
+    }
 }
+
+/*
+TODO: add ignore expressions (eg 0*(a=b) would be ignore(a=b, 0)
+TODO: add boolean binary/numeric expressions
+*/

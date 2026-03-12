@@ -127,4 +127,10 @@ public class VariableLister implements ExpressionVisitor<VariableList>, Statemen
     public VariableList visitRepeatExpression(RepeatExpression expr) {
         return expr.expr.accept(this);
     }
+    public VariableList visitNumericBinaryExpression(NumericBinaryExpression expr) {
+        return expr.left.accept(this).with(expr.right.accept(this));
+    }
+    public VariableList visitNumericUnaryExpression(NumericUnaryExpression expr) {
+        return expr.expr.accept(this);
+    }
 }

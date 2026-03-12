@@ -133,6 +133,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
             case BANG -> expr.expr.accept(this).inv();
             case HASH -> expr.expr.accept(this).toNumber();
             case QUESTION -> expr.expr.accept(this).isTruthy();
+            case ARTIFICIAL_NBOOL -> BooleanValue.fromBoolean(!expr.expr.accept(this).isTruthy().value);
             default -> throw new RuntimeException("Invalid operator: " + expr.op);
         };
     }
@@ -433,5 +434,34 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Va
     }
     public Value visitRepeatExpression(RepeatExpression expr) {
         return executeRepeat(expr, LoopEvaluationStrategy.ALL_ELEMENTS);
+    }
+    public Value visitNumericBinaryExpression(NumericBinaryExpression expr) {
+        double left = ((NumericValue) expr.left.accept(this)).number;
+        double right = ((NumericValue) expr.right.accept(this)).number;
+        return switch (expr.op.type()) {
+            case PLUS -> NumericValue.of(left + right);
+            case MINUS -> NumericValue.of(left - right);
+            case STAR -> NumericValue.of(left * right);
+            case SLASH -> NumericValue.of(left / right);
+            case MOD -> NumericValue.of(left % right);
+            case LTEQ -> BooleanValue.fromBoolean(left <= right);
+            case GTEQ -> BooleanValue.fromBoolean(left >= right);
+            case LT -> BooleanValue.fromBoolean(left < right);
+            case GT -> BooleanValue.fromBoolean(left > right);
+            case EQEQ -> BooleanValue.fromBoolean(left == right);
+            case BANG_EQ -> BooleanValue.fromBoolean(left != right);
+            default -> throw new RuntimeException("Invalid operator: " + expr.op);
+        };
+    }
+    public Value visitNumericUnaryExpression(NumericUnaryExpression expr) {
+        NumericValue v = (NumericValue) expr.expr.accept(this);
+        double value = v.number;
+        return switch (expr.op.type()) {
+            case MINUS -> NumericValue.of(-value);
+            case QUESTION -> BooleanValue.fromBoolean(value != 0);
+            case HASH -> v;
+            case ARTIFICIAL_NBOOL -> BooleanValue.fromBoolean(value == 0);
+            default -> throw new RuntimeException("Invalid operator: " + expr.op);
+        };
     }
 }
