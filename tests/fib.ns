@@ -31,7 +31,7 @@ $ println(
         )($bignum(0), $bignum(0), $bignum(1))
 );
 // using bignums here for tests. significantly slower unless using normal doubles
-// equally fast to ALGORITHMIC, sometimes even faster. In some tests, the difference can be up to 40%
+// equally fast to ALGORITHMIC, sometimes even faster (unless using bignums). In some tests, the difference can be up to 40%
 // the compiler optimizes the for loop away and turns it into a simple incrementing loop variable, which makes this more powerful
 $ println("Time spent:", ($clock() - t));
 

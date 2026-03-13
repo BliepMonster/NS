@@ -12,4 +12,7 @@ public class BlockExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitBlockExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof BlockExpression b && b.statements.equals(statements);
+    }
 }

@@ -12,4 +12,7 @@ public class FunctionCallExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitFunctionCallExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof FunctionCallExpression f && f.function.equals(function) && f.args.equals(args);
+    }
 }

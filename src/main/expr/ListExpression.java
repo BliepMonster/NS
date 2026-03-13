@@ -10,4 +10,7 @@ public class ListExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitListExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof ListExpression l && l.elements.equals(elements);
+    }
 }

@@ -8,4 +8,7 @@ public class ReturnExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitReturnExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof ReturnExpression r && r.value.equals(value);
+    }
 }

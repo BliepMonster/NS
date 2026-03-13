@@ -13,4 +13,7 @@ public class ExpressionStatement extends Statement {
     public <R> R accept(StatementVisitor<R> visitor) {
         return visitor.visitExpressionStatement(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof ExpressionStatement s && s.expr.equals(expr);
+    }
 }

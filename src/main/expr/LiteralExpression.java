@@ -10,4 +10,7 @@ public class LiteralExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitLiteralExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof LiteralExpression l && l.value.equals(value);
+    }
 }

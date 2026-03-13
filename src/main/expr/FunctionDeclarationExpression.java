@@ -14,4 +14,7 @@ public class FunctionDeclarationExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitFunctionDeclarationExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof FunctionDeclarationExpression f && f.args.equals(args) && f.body.equals(body);
+    }
 }

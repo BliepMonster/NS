@@ -10,4 +10,7 @@ public class IndexExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitIndexExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof IndexExpression i && i.expr.equals(expr) && i.index.equals(index);
+    }
 }

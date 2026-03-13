@@ -10,4 +10,7 @@ public class EnumDeclarationExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitEnumDeclarationExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof EnumDeclarationExpression e && e.members.equals(members);
+    }
 }

@@ -23,6 +23,8 @@ import static main.TokenType.*;
  * x = 0+obj;
  * }<br>
  * Here, it will try to turn it into {@code x = obj}. If obj is not a number, these are not equivalent. However, if obj is not a number, the code would've crashed anyway.
+ *
+ * If the optimizer detects a certain runtime crash,
  */
 public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor<Expression> {
     private final ArrayList<Statement> statements;
@@ -178,8 +180,15 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                 return new BinaryExpression(left, expr.op, right);
             if (ltype != rtype)
                 return new LiteralExpression(BooleanValue.TRUE);
-        } if (getType(left) == VariableType.NUMBER && getType(right) == VariableType.NUMBER)
+        }
+        // see optimization policy; NUMBER is only compatible with NUMBER
+        if (getModificationType(left) == VariableType.NUMBER) {
+            // special case
+            if (expr.op.type() == TokenType.EQEQ || expr.op.type() == TokenType.BANG_EQ)
+                if (getModificationType(right) != VariableType.NUMBER)
+                    return new BinaryExpression(left, expr.op, right);
             return new NumericBinaryExpression(left, expr.op, right).accept(this);
+        }
         return new BinaryExpression(left, expr.op, right);
     }
     public Expression visitUnaryExpression(UnaryExpression expr) {
@@ -191,13 +200,13 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                         return expression;
                     else
                         return new UnaryExpression(expr.op, expression);
-                if (getType(expression) == VariableType.NUMBER)
+                if (getModificationType(expression) == VariableType.NUMBER)
                     return new NumericUnaryExpression(expression, expr.op).accept(this);
                 return new LiteralExpression(literal.value.isTruthy());
             }
             case HASH -> {
                 if (!(expression instanceof LiteralExpression literal))
-                    if (getType(expression) == VariableType.NUMBER)
+                    if (getModificationType(expression) == VariableType.NUMBER)
                         return expression;
                     else
                         return new UnaryExpression(expr.op, expression);
@@ -208,7 +217,7 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                     return unary.expr;
                 else if (expression instanceof LiteralExpression literal)
                     return new LiteralExpression(literal.value.neg());
-                if (getType(expression) == VariableType.NUMBER)
+                if (getModificationType(expression) == VariableType.NUMBER)
                     return new NumericUnaryExpression(expression, expr.op).accept(this);
                 return new UnaryExpression(expr.op, expression);
             }
@@ -577,6 +586,10 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
     public static VariableType getType(Expression cond) {
         if (cond.accept(analyzer))
             return VariableType.UNKNOWN;
+        return getModificationType(cond);
+    }
+    // getType() assuming side effects are allowed
+    public static VariableType getModificationType(Expression cond) {
         if (cond instanceof LiteralExpression lit) {
             if (lit.value instanceof NumericValue)
                 return VariableType.NUMBER;
@@ -616,10 +629,10 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                 default -> VariableType.UNKNOWN;
             };
         } else if (cond instanceof TernaryExpression te) {
-            VariableType tr = getType(te.trueExpr);
+            VariableType tr = getModificationType(te.trueExpr);
             if (tr == VariableType.UNKNOWN)
                 return tr;
-            VariableType fr = getType(te.falseExpr);
+            VariableType fr = getModificationType(te.falseExpr);
             if (fr == VariableType.UNKNOWN)
                 return fr;
             return tr == fr ? tr : VariableType.UNKNOWN;
@@ -638,9 +651,9 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
         else if (cond instanceof EnumDeclarationExpression)
             return VariableType.ENUM;
         else if (cond instanceof AssignmentExpression assignment) {
-            return getType(assignment.value);
+            return getModificationType(assignment.value);
         } else if (cond instanceof IndexExpression ie) {
-            VariableType t = getType(ie.expr);
+            VariableType t = getModificationType(ie.expr);
             if (t == VariableType.STRING)
                 return VariableType.STRING;
             else if (t == VariableType.VECTOR)
@@ -650,35 +663,35 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
             return switch (be.op.type()) {
                 case IN, OR, AND, EQEQ, BANG_EQ, GT, LT, GTEQ, LTEQ -> VariableType.BOOLEAN;
                 case PIPE -> {
-                    if (getType(be.left) == VariableType.LIST)
+                    if (getModificationType(be.left) == VariableType.LIST)
                         yield VariableType.LIST;
-                    else if (getType(be.left) == VariableType.SET)
+                    else if (getModificationType(be.left) == VariableType.SET)
                         yield VariableType.SET;
-                    else if (getType(be.left) == VariableType.DICTIONARY)
+                    else if (getModificationType(be.left) == VariableType.DICTIONARY)
                         yield VariableType.DICTIONARY;
                     else yield VariableType.UNKNOWN;
                 }
                 case PLUS, MOD, STAR, MINUS -> {
-                    if (getType(be.left) == VariableType.NUMBER)
+                    if (getModificationType(be.left) == VariableType.NUMBER)
                         yield VariableType.NUMBER;
-                    else if (getType(be.left) == VariableType.BIG_NUMBER)
+                    else if (getModificationType(be.left) == VariableType.BIG_NUMBER)
                         yield VariableType.BIG_NUMBER;
-                    else if (getType(be.left) == VariableType.VECTOR)
+                    else if (getModificationType(be.left) == VariableType.VECTOR)
                         yield VariableType.VECTOR;
-                    else if (getType(be.left) == VariableType.FUNCTION)
+                    else if (getModificationType(be.left) == VariableType.FUNCTION)
                         yield VariableType.FUNCTION;
                     yield VariableType.UNKNOWN;
                 }
                 case SLASH -> {
-                    if (getType(be.left) == VariableType.NUMBER)
+                    if (getModificationType(be.left) == VariableType.NUMBER)
                         yield VariableType.NUMBER;
-                    else if (getType(be.left) == VariableType.BIG_NUMBER)
+                    else if (getModificationType(be.left) == VariableType.BIG_NUMBER)
                         yield VariableType.BIG_NUMBER;
-                    else if (getType(be.left) == VariableType.VECTOR)
+                    else if (getModificationType(be.left) == VariableType.VECTOR)
                         yield VariableType.VECTOR;
-                    else if (getType(be.left) == VariableType.SET)
+                    else if (getModificationType(be.left) == VariableType.SET)
                         yield VariableType.SET;
-                    else if (getType(be.left) == VariableType.FUNCTION)
+                    else if (getModificationType(be.left) == VariableType.FUNCTION)
                         yield VariableType.FUNCTION;
                     else yield VariableType.UNKNOWN;
                 }
@@ -687,20 +700,20 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
         } else if (cond instanceof UnaryExpression ue) {
             return switch (ue.op.type()) {
                 case MINUS -> {
-                    if (getType(ue.expr) == VariableType.NUMBER)
+                    if (getModificationType(ue.expr) == VariableType.NUMBER)
                         yield VariableType.NUMBER;
-                    else if (getType(ue.expr) == VariableType.BIG_NUMBER)
+                    else if (getModificationType(ue.expr) == VariableType.BIG_NUMBER)
                         yield VariableType.BIG_NUMBER;
                     else yield VariableType.UNKNOWN;
                 }
                 case BANG -> {
-                    if (getType(ue.expr) == VariableType.BOOLEAN)
+                    if (getModificationType(ue.expr) == VariableType.BOOLEAN)
                         yield VariableType.BOOLEAN;
                     else yield VariableType.UNKNOWN;
                 }
                 case QUESTION, ARTIFICIAL_NBOOL -> VariableType.BOOLEAN;
                 case HASH -> {
-                    if (getType(ue.expr) != VariableType.UNKNOWN)
+                    if (getModificationType(ue.expr) != VariableType.UNKNOWN)
                         yield VariableType.NUMBER;
                     else yield VariableType.UNKNOWN;
                 }
@@ -711,21 +724,21 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
         } else if (cond instanceof FunctionDeclarationExpression) {
             return VariableType.FUNCTION;
         } else if (cond instanceof CatchExpression ce) {
-            VariableType t = getType(ce.expr);
-            if (t == getType(ce.fallback))
+            VariableType t = getModificationType(ce.expr);
+            if (t == getModificationType(ce.fallback))
                 return t;
             return VariableType.UNKNOWN;
         } else if (cond instanceof MatchExpression me) {
             VariableType t = null;
             for (MatchExpression.Case match : me.cases) {
                 if (t == null) {
-                    t = getType(match.pattern());
-                } else if (t != getType(match.pattern())) {
+                    t = getModificationType(match.pattern());
+                } else if (t != getModificationType(match.pattern())) {
                     return VariableType.UNKNOWN;
                 }
             }
             if (me.other != null) {
-                VariableType ot = getType(me.other);
+                VariableType ot = getModificationType(me.other);
                 if (t == ot)
                     return t;
                 return VariableType.UNKNOWN;
@@ -799,10 +812,6 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                     if (nv.number == 1)
                         return left;
                 }
-                case MOD -> {
-                    if (nv.number == 0)
-                        throw new RuntimeException("Modulo by zero");
-                }
                 case BANG_EQ -> {
                     if (nv.number == 0)
                         return new NumericUnaryExpression(left, new Token("?", QUESTION, expr.op.line())).accept(this);
@@ -812,6 +821,9 @@ public class Optimizer implements StatementVisitor<Statement>, ExpressionVisitor
                         return new NumericUnaryExpression(left, new Token("!?", ARTIFICIAL_NBOOL, expr.op.line())).accept(this);
                 }
             }
+        }
+        if (expr.op.type() == MINUS && right.equals(left) && !right.accept(analyzer)) {
+            return new LiteralExpression(NumericValue.ZERO);
         }
         return new NumericBinaryExpression(left, expr.op, right);
     }

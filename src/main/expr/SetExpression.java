@@ -10,4 +10,7 @@ public class SetExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitSetExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof SetExpression s && s.expr.equals(expr);
+    }
 }

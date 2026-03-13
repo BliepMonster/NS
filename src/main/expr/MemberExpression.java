@@ -10,4 +10,7 @@ public class MemberExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitMemberExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof MemberExpression m && m.expr.equals(expr) && m.member.equals(member);
+    }
 }

@@ -10,4 +10,7 @@ public class RepeatExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitRepeatExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof RepeatExpression r && r.expr.equals(expr) && r.repeat == repeat;
+    }
 }

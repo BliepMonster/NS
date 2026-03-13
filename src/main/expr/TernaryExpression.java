@@ -12,4 +12,7 @@ public class TernaryExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitTernaryExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof TernaryExpression t && t.condition.equals(condition) && t.trueExpr.equals(trueExpr) && t.falseExpr.equals(falseExpr);
+    }
 }

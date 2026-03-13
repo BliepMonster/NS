@@ -1,7 +1,5 @@
 package main.expr;
 
-import main.Statement;
-
 public class LoopExpression extends Expression {
     public final Expression cond;
     public final Expression body;
@@ -11,5 +9,8 @@ public class LoopExpression extends Expression {
     }
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitLoopExpression(this);
+    }
+    public boolean equals(Object o) {
+        return o instanceof LoopExpression l && l.cond.equals(cond) && l.body.equals(body);
     }
 }

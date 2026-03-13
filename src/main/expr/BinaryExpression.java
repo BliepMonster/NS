@@ -13,4 +13,7 @@ public class BinaryExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitBinaryExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof BinaryExpression b && b.op == op && b.left.equals(left) && b.right.equals(right);
+    }
 }

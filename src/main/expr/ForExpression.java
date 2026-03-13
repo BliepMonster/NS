@@ -13,4 +13,7 @@ public class ForExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitForExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof ForExpression f && f.action.equals(action) && f.list.equals(list) && f.variable == variable;
+    }
 }

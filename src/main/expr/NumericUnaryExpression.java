@@ -12,4 +12,7 @@ public class NumericUnaryExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitNumericUnaryExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof NumericUnaryExpression n && n.op == op && n.expr.equals(expr);
+    }
 }

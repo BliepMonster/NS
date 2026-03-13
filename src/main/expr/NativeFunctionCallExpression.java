@@ -12,4 +12,7 @@ public class NativeFunctionCallExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitNativeFunctionCallExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof NativeFunctionCallExpression n && n.name.equals(name) && n.args.equals(args);
+    }
 }

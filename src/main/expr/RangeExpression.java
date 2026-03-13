@@ -9,4 +9,7 @@ public class RangeExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitRangeExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof RangeExpression r && r.start.equals(start) && r.end.equals(end);
+    }
 }

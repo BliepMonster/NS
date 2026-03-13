@@ -11,4 +11,7 @@ public class DictionaryExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitDictionaryExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof DictionaryExpression d && d.pairs.equals(pairs);
+    }
 }

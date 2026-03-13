@@ -14,4 +14,7 @@ public class AssignmentExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitAssignmentExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof AssignmentExpression a && a.token == token && a.target.equals(target) && a.value.equals(value);
+    }
 }

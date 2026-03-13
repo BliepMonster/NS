@@ -13,4 +13,7 @@ public class NumericBinaryExpression extends Expression {
     public <R> R accept(ExpressionVisitor<R> visitor) {
         return visitor.visitNumericBinaryExpression(this);
     }
+    public boolean equals(Object o) {
+        return o instanceof NumericBinaryExpression b && b.op == op && b.left.equals(left) && b.right.equals(right);
+    }
 }
